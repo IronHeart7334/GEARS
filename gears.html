@@ -363,9 +363,9 @@
             	load_map:function(){
             	    this.blocks = [];
             		this.current_map = this.level_data[this.current_map_number][0];
-            		this.height = this.level_data[this.current_map_number][0].length;
             		this.longest_row = 0;
             		this.height = this.current_map.length;
+            		this.height_in_px =  this.height * block_size;
             		for (var row = 0; row < this.current_map.length; row++) {
             			for (var column = 0; column < this.current_map[row].length; column++){
             				
@@ -383,7 +383,6 @@
             	load_foreground:function(){
             		this.foreground_blocks = [];
             		this.current_map = this.level_data[this.current_map_number][1];
-            		this.height = this.level_data[this.current_map_number][1].length;
             		this.longest_row = 0;
             		this.height = this.current_map.length;
             		for (var row = 0; row < this.current_map.length; row++) {
@@ -480,6 +479,7 @@
             				this.current_map_number -= 1;
             				this.load();
             				player.x = this.longest_row * block_size - block_size / 2;
+            				player.spawn_coords = [player.x, player.y];
             			} 
             		}
             		
@@ -488,6 +488,7 @@
             				this.current_map_number += 1;
             				this.load();
             				player.x = block_size / 2;
+            				player.spawn_coords = [player.x, player.y];
             			} 
             		}
             	},
@@ -507,6 +508,7 @@
             	load:function(x, y){
             		this.x = x;
             		this.y = y;
+            		this.spawn_coords = [x, y];
             		this.facing = "right";
             		this.gears = ["none"];
             		this.current_gear = 0;
@@ -525,6 +527,11 @@
             	reset_mom:function() {
             		this.reset_x_mom();
             		this.reset_y_mom();
+            	},
+            	
+            	respawn:function() {
+            		this.x = this.spawn_coords[0];
+            		this.y = this.spawn_coords[1];
             	},
             	
             	fall:function() {
@@ -579,6 +586,10 @@
             		this.y += this.y_mom;
             		this.falling = true;
             		this.reset_mom();
+            		
+            		if(this.y >= current_level.height_in_px){
+            			this.respawn();
+            		}
             	},
             	
             	draw_torso:function() {
