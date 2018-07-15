@@ -5,7 +5,7 @@ function Block(c, x, y, can_hit) {
     this.y = y * block_size;
     this.can_hit = can_hit;
 }
-           // Class methods
+// Class methods
 Block.prototype = {
 
     draw:function(){
