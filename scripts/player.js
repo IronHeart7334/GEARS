@@ -1,59 +1,43 @@
 function Player() {
-    this.moveMod = 0; //maybe change this to 1 or -1, (facing), with another var for moving?
-    /*
-    All x movement is multipled by this.
-    either 
-    -1 (left),
-    0 (not moving),
-    or 1 (right)
-    */
-    this.xMom = 0;
-    this.yMom = 0;
+    this.facingMod = 1; // 1: right, -1: left
+    this.x = 0;
+    this.y = 0;
+    this.moving = false; // moving left or right
     this.arm_shift = 0;
     
+    this.falling = true;
     this.jumping = false;
     this.timeInJump = 0;
     
-    this.showHUD = true;
-    
     this.magnetic = true;
     
-    // values 3-7
-    this.power_capacity = 5;
     this.speed = 5;
-    this.power_consumption = 5;
 }
 Player.prototype = {
     load:function(x, y){
         this.x = x;
         this.y = y;
-        this.xMom = 0;
-        this.yMom = 0;
         this.spawn_coords = [x, y];
-        this.moveMod = 0;
+        this.facingMod = 1;
+        this.moving = false;
+        this.falling = true;
         this.jumping = false;
         this.timeInJump = 0;
-        this.facing = "right";
+        
         this.gears = ["none"];
         this.current_gear = 0;
         this.gear_count = 0;
-        this.power = this.power_capacity * POWER_MULT;
     },
     
-    applyMom : function(x, y){
-        // adds momentum
-        this.xMom += x;
-        this.yMom += y;
+    move : function(x, y){
+        this.x += x;
+        this.y += y;
     },
-    reset_x_mom:function() {
-        this.xMom = 0;
+    moveX : function(x) {
+        this.x += x;
     },
-    reset_y_mom:function() {
-        this.yMom = 0;
-    },
-    reset_mom:function() {
-        this.reset_x_mom();
-        this.reset_y_mom();
+    moveY : function(y) {
+        this.y += y;
     },
     respawn:function() {
         this.x = this.spawn_coords[0];
@@ -62,21 +46,21 @@ Player.prototype = {
     fall:function() {
         // don't mess with my jumping
         if(!this.jumping){
-            this.yMom += GRAVITY;
+            this.moveY(GRAVITY);
         }
     },
     
     moveLeft:function() {
         // notifies the player to move left
-        this.moveMod = -1;
-        this.facing = "left";
+        this.facingMod = -1;
+        this.moving = true;
     },
     moveRight:function() {
-        this.moveMod = 1;
-        this.facing = "right";
+        this.facingMod = 1;
+        this.moving = true;
     },
     stop : function(){
-        this.moveMod = 0;
+        this.moving = false;
     },
     
     obtain_gear:function(gear) {
@@ -99,7 +83,7 @@ Player.prototype = {
     },
     
     jump : function() {
-        if (this.gears[this.current_gear] != "none") {
+        if (this.gears[this.current_gear] != "none" && !this.falling) {
             this.jumping = true;
         } else {console.log("no gear");}
     },
@@ -109,9 +93,8 @@ Player.prototype = {
         var totalX = this.gears[this.current_gear].xMom * block_size;
         var totalY = this.gears[this.current_gear].yMom * block_size;
         
-        var mod = (this.facing === "right") ? 1 : -1;
-        this.xMom += totalX * mod / jumpTime;
-        this.yMom -= totalY / jumpTime;
+        this.x += totalX * this.facingMod / jumpTime;
+        this.y -= totalY / jumpTime;
         this.timeInJump++;
         if(this.timeInJump >= jumpTime){
             this.timeInJump = 0;
@@ -120,16 +103,15 @@ Player.prototype = {
     },
     
     update:function() {
-        this.fall();
+        if(this.falling){
+            this.fall();
+        }
         if(this.jumping){
             this.updateJump();
-        } else {
-            this.xMom += (block_size / FPS) * this.speed * this.moveMod;
+        } else if(this.moving){
+            this.moveX((block_size / FPS) * this.speed * this.facingMod);
         }
-        this.x += this.xMom;
-        this.y += this.yMom;
-        this.reset_mom();
-        
+        this.falling = true;
         if(this.y >= current_level.height_in_px){
             this.respawn();
         }
@@ -137,12 +119,10 @@ Player.prototype = {
     
     draw_torso:function() {
         var torso_size = block_size * 0.5;
-        
         canvas.fillStyle = silver(5);
-        if (this.facing == "left"){
+        if (this.facingMod === -1){
             canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
-        }
-        if (this.facing == "right"){
+        } else {
             canvas.fillRect(this.x - block_size / 2, this.y - torso_size / 2, torso_size, torso_size);
         }
         
@@ -163,12 +143,7 @@ Player.prototype = {
     
     draw_arms:function(){
         canvas.fillStyle = silver(7);
-        if (this.facing == "left"){
-            canvas.fillRect(this.x + this.arm_shift, this.y, -block_size / 3, block_size / 5);
-        }
-        if (this.facing == "right"){
-            canvas.fillRect(this.x + this.arm_shift, this.y, block_size / 3, block_size / 5);
-        }
+        canvas.fillRect(this.x + this.arm_shift, this.y, (block_size / 3) * this.facingMod, block_size / 5);
     },
     
     draw_head:function(){
@@ -195,26 +170,8 @@ Player.prototype = {
         draw_gear(canvas_size * 0.025, canvas_size * 0.925, 10, this.gears[this.current_gear].color, false);  
     },
     
-    show_power:function() {
-        canvas.fillStyle = silver(7);
-        canvas.beginPath();
-        canvas.arc(canvas_size * 0.25, canvas_size * 0.95, canvas_size / 40, 0, 2 * Math.PI);
-        canvas.fill();
-        
-        canvas.fillStyle = silver(7);
-        canvas.beginPath();
-        canvas.arc(canvas_size * 0.75, canvas_size * 0.95, canvas_size / 40, 0, 2 * Math.PI);
-        canvas.fill();
-        
-        canvas.fillStyle = energy_color;
-        canvas.fillRect(canvas_size * 0.25, canvas_size * 0.925, (this.power / (this.power_capacity * POWER_MULT)) * canvas_size / 2, canvas_size / 20);
-    },
-    
     drawHUD:function() {
-        if (this.showHUD){
-            this.show_gear();
-            this.show_power();
-        }
+        this.show_gear();
     },
     
     reset_arm:function() {

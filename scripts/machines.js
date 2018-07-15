@@ -191,6 +191,7 @@ Tram.prototype = {
         
         if (player.x >= this.x && player.x <= this.x + block_size && player.y > this.y + block_size * 1.5){
             player.y -= GRAVITY * 2;
+           // player.falling = false;
             if (player.y > this.y + block_size * 1.5){return;}
             player.x = this.x + block_size / 2;
             this.moving = true;
