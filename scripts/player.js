@@ -1,15 +1,19 @@
 function Player() {
-    this.moveMod = 0;
+    this.moveMod = 0; //maybe change this to 1 or -1, (facing), with another var for moving?
     /*
-    All movement is multipled by this.
+    All x movement is multipled by this.
     either 
     -1 (left),
     0 (not moving),
     or 1 (right)
     */
-    this.x_mom = 0;
-    this.y_mom = 0;
+    this.xMom = 0;
+    this.yMom = 0;
     this.arm_shift = 0;
+    
+    this.jumping = false;
+    this.timeInJump = 0;
+    
     this.showHUD = true;
     
     this.magnetic = true;
@@ -23,8 +27,12 @@ Player.prototype = {
     load:function(x, y){
         this.x = x;
         this.y = y;
+        this.xMom = 0;
+        this.yMom = 0;
         this.spawn_coords = [x, y];
         this.moveMod = 0;
+        this.jumping = false;
+        this.timeInJump = 0;
         this.facing = "right";
         this.gears = ["none"];
         this.current_gear = 0;
@@ -32,27 +40,29 @@ Player.prototype = {
         this.power = this.power_capacity * POWER_MULT;
     },
     
+    applyMom : function(x, y){
+        // adds momentum
+        this.xMom += x;
+        this.yMom += y;
+    },
     reset_x_mom:function() {
-        this.x_mom = 0;
+        this.xMom = 0;
     },
-    
     reset_y_mom:function() {
-        this.y_mom = 0;
+        this.yMom = 0;
     },
-    
     reset_mom:function() {
         this.reset_x_mom();
         this.reset_y_mom();
     },
-    
     respawn:function() {
         this.x = this.spawn_coords[0];
         this.y = this.spawn_coords[1];
     },
-    
     fall:function() {
-        if(this.falling){
-            this.y_mom += GRAVITY;
+        // don't mess with my jumping
+        if(!this.jumping){
+            this.yMom += GRAVITY;
         }
     },
     
@@ -61,13 +71,10 @@ Player.prototype = {
         this.moveMod = -1;
         this.facing = "left";
     },
-    
     moveRight:function() {
-        //this.x_mom = block_size / 20 * this.speed;
         this.moveMod = 1;
         this.facing = "right";
     },
-    
     stop : function(){
         this.moveMod = 0;
     },
@@ -91,25 +98,36 @@ Player.prototype = {
         } else {this.current_gear = 0;}
     },
     
-    jump:function() {
-        if (this.falling){return;}
+    jump : function() {
         if (this.gears[this.current_gear] != "none") {
-            if (this.facing == "left"){
-                this.x_mom -= block_size * this.gears[this.current_gear].x_mom;
-            }
-            if (this.facing == "right"){
-                this.x_mom += block_size * this.gears[this.current_gear].x_mom;
-            }
-            this.y_mom -= block_size * this.gears[this.current_gear].y_mom;
+            this.jumping = true;
         } else {console.log("no gear");}
+    },
+    updateJump : function(){
+        var jumpTime = FPS / 2; //time it takes to finish jump
+        // the total amount moved after jumping
+        var totalX = this.gears[this.current_gear].xMom * block_size;
+        var totalY = this.gears[this.current_gear].yMom * block_size;
+        
+        var mod = (this.facing === "right") ? 1 : -1;
+        this.xMom += totalX * mod / jumpTime;
+        this.yMom -= totalY / jumpTime;
+        this.timeInJump++;
+        if(this.timeInJump >= jumpTime){
+            this.timeInJump = 0;
+            this.jumping = false;
+        }
     },
     
     update:function() {
         this.fall();
-        this.x_mom += (block_size / FPS) * this.speed * this.moveMod;
-        this.x += this.x_mom;
-        this.y += this.y_mom;
-        this.falling = true;
+        if(this.jumping){
+            this.updateJump();
+        } else {
+            this.xMom += (block_size / FPS) * this.speed * this.moveMod;
+        }
+        this.x += this.xMom;
+        this.y += this.yMom;
         this.reset_mom();
         
         if(this.y >= current_level.height_in_px){
