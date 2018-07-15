@@ -3,6 +3,11 @@
     <head>
         <title> GEARS </title>
         <meta name="Creator" content="Matt Crow">
+        <script src="scripts/level.js"></script>
+        <script src="scripts/block.js"></script>
+        <script src="scripts/jump.js"></script>
+        <script src="scripts/machines.js"></script>
+        <script src="scripts/player.js"></script>
         <style>
             div {
                 border-style: groove;
@@ -54,7 +59,6 @@
         	var canvas;
         	var game_timer;
         	var timer_started;
-        	var pressed_key;
         	
         	// Variables
         	var FPS = 60;
@@ -227,658 +231,7 @@
             			}
             		}
 			}
-
-
-
-            // Class constructors
-            function Block(c, x, y, can_hit) {
-            	this.c = c;
-            	this.x = x * block_size;
-            	this.y = y * block_size;
-            	this.can_hit = can_hit;
-            }
-        	
-        	// this can be improved
-            function Level(name, colors, level_data, start) {
-            	this.name = name;
-            	this.colors = colors;
-            	this.level_data = level_data;
-            	this.current_map_number = start[0];
-            	this.start_coords = [start[1], start[2]];
-            }
             
-            function Jump(name, x_mom, y_mom, color){
-            	this.name = name;
-            	this.x_mom = x_mom;
-            	this.y_mom = y_mom;
-            	this.color = color;
-            }
-            
-            function Player() {
-            	this.x_mom = 0;
-            	this.y_mom = 0;
-            	this.arm_shift = 0;
-            	this.showHUD = true;
-            	
-            	this.magnetic = true;
-            	
-            	// values 3-7
-            	this.power_capacity = 5;
-    			this.speed = 5;
-    			this.power_consumption = 5;
-            }
-            
-            // Machine Classes
-            function Gear(x, y, jump){
-            	this.x = x * block_size + block_size / 2;
-            	this.y = y * block_size + block_size / 2;
-            	this.jump = jump;
-            	this.rotated = false;
-            }
-            
-            function Generator(x, y) {
-        		this.x = x * block_size;
-        		this.y = y * block_size;
-        	}
-        	
-        	function Door(x, y) {
-        		this.x = x * block_size;
-        		this.y = y * block_size;
-        		this.powered = false;
-        	}
-        	
-        	function Belt(x, y, width, direction, speed, auto_on){
-        		this.x = x * block_size;
-        		this.y = y * block_size;
-        		this.width = width * block_size;
-        		this.direction = direction;
-        		this.speed = speed;
-        		this.auto_on = auto_on;
-        	}
-        	
-        	function Tram(x, y, destinations, auto_on){
-        		this.x = x * block_size;
-        		this.y = y * block_size;
-        		this.auto_on = auto_on;
-        		this.destinations = [];
-        		for (dest of destinations){
-        			this.destinations.push([dest[0] * block_size, dest[1] * block_size]);
-        		}
-        		this.destinations.push([this.x, this.y]);
-        		this.dest_num = 0;
-        		this.ready = true;
-        		this.moving = false;
-        	}
-        	
-        	// not finished
-        	function Train(x, y, width, gears){
-        		this.x = x * block_size;
-        		this.y = y * block_size;
-        		this.width = width * block_size;
-        		this.gears = gears;
-        	}
-            
-            
-            
-            // Class methods
-            Block.prototype = {
-            	
-            	draw:function(){
-            		var shift = block_size / 10;
-            		canvas.fillStyle = this.c[0];
-				    canvas.fillRect(this.x, this.y, block_size, block_size);
-				    if (!this.can_hit){return};
-				    canvas.fillStyle = this.c[1];
-				    canvas.fillRect(this.x + shift, this.y + shift, block_size - shift * 2, block_size - shift * 2);	
-            	},
-            	
-            	top_coll:function(object) {
-            		if (object.x + 1 > this.x && object.x - 1 < this.x + block_size && object.y + block_size / 2 >= this.y && object.y + block_size / 2 < this.y + block_size){
-            			object.falling = false;
-            			object.y = this.y - block_size / 2;
-            		}
-            	},
-            	
-            	bottom_coll:function(object){
-            		if (object.x > this.x && object.x < this.x + block_size && object.y - block_size / 2 > this.y && object.y - block_size / 2 < this.y + block_size){
-            			object.y = this.y + block_size * 1.5;
-            		} 
-            	},
-            	
-            	left_coll:function(object) {
-            		while (object.y >= this.y && object.y <= this.y + block_size && object.x >= this.x + block_size && object.x <= this.x + block_size * 1.5){
-            			object.x += 1;
-            		}
-            	},
-            	
-            	right_coll:function(object) {
-            		while (object.y >= this.y && object.y <= this.y + block_size && object.x + block_size / 2 >= this.x && object.x <= this.x + block_size / 2){
-            			object.x -= 1;
-            		}
-            	}	
-            }
-            
-            Level.prototype = {
-            	
-            	load_map:function(){
-            	    this.blocks = [];
-            		this.current_map = this.level_data[this.current_map_number][0];
-            		this.longest_row = 0;
-            		this.height = this.current_map.length;
-            		this.height_in_px =  this.height * block_size;
-            		for (var row = 0; row < this.current_map.length; row++) {
-            			for (var column = 0; column < this.current_map[row].length; column++){
-            				
-            				if (this.current_map[row].length > this.longest_row){
-            					this.longest_row = this.current_map[row].length;
-            				} 
-            				
-            				if (this.current_map[row][column] != 0){
-            					this.blocks.push(new Block(this.colors[this.current_map[row][column] - 1], column, row, true));
-            				}	
-            			}
-            		}
-            	},
-            	
-            	load_foreground:function(){
-            		this.foreground_blocks = [];
-            		this.current_map = this.level_data[this.current_map_number][1];
-            		this.longest_row = 0;
-            		this.height = this.current_map.length;
-            		for (var row = 0; row < this.current_map.length; row++) {
-            			for (var column = 0; column < this.current_map[row].length; column++){
-            				
-            				if (this.current_map[row].length > this.longest_row){
-            					this.longest_row = this.current_map[row].length;
-            				} 
-            				
-            				if (this.current_map[row][column] != 0){
-            					this.foreground_blocks.push(new Block(this.colors[this.current_map[row][column] - 1], column, row, false));
-            				}	
-            			}
-            		}
-            	},
-            	
-            	load_machines:function() {
-            		this.machines = [];
-            		this.current_machines = this.level_data[this.current_map_number][2];
-            		for (machine of this.current_machines) {
-            			this.machines.push(machine);
-            		}
-            	},
-            	
-            	load:function() {
-            		this.load_map();
-            		this.load_foreground();
-            		this.load_machines();
-            	},
-            	
-            	add_energy:function(x, y) {
-            		for (coord_set of this.energy){
-            			if (coord_set[0] == x && coord_set[1] == y){return;}
-            		}
-            		this.energy.push([x, y]);
-            	},
-            	
-            	check_energy:function(machine) {
-            		machine.powered = false;
-            		for (coord_set of this.energy){
-            			if (coord_set[0] == machine.x - block_size && coord_set[1] == machine.y){
-            				machine.powered = true;
-            				break;
-            			}
-            		}
-            	},
-            	
-            	check_coll:function(object) {
-            		for (block of this.blocks){
-            			block.top_coll(object);
-            			block.bottom_coll(object);
-            			block.left_coll(object);
-            			block.right_coll(object);
-            		}
-            	},
-            	
-            	update_machines:function() {
-            		this.energy = [];
-            		for (machine of this.machines) {
-            			this.check_energy(machine);
-            			machine.update();
-            		}
-            	},
-            	
-            	draw_map:function() {
-            		for (var block of this.blocks){
-            			block.draw();
-            		}
-            	},
-            	
-            	draw_foreground:function() {
-            		for (var block of this.foreground_blocks){
-            			block.draw();
-            		}
-            	},
-            	
-            	draw_machines:function() {
-            		for (machine of this.machines){
-            			machine.draw();
-            		}
-            	},
-            	
-            	draw:function() {
-            		this.draw_foreground();
-            		this.draw_machines();
-            		this.draw_map();
-            	},
-            	
-            	check_for_area:function(){
-            	
-            		if (player.x < block_size / 2) {
-            		
-            			if (this.current_map_number > 0){
-            				this.current_map_number -= 1;
-            				this.load();
-            				player.x = this.longest_row * block_size - block_size / 2;
-            				player.spawn_coords = [player.x, player.y];
-            			} 
-            		}
-            		
-            		if (player.x > this.longest_row * block_size) {
-            			if (this.current_map_number < this.level_data.length - 1){
-            				this.current_map_number += 1;
-            				this.load();
-            				player.x = block_size / 2;
-            				player.spawn_coords = [player.x, player.y];
-            			} 
-            		}
-            	},
-            	
-            	update:function() {
-            		this.check_for_area();
-            		this.check_coll(player);
-            		this.update_machines();
-            	},
-            	
-            	run:function() {
-            		player.load(this.start_coords[0], this.start_coords[1]);
-            	}
-            }
-            
-            Player.prototype = {
-            	load:function(x, y){
-            		this.x = x;
-            		this.y = y;
-            		this.spawn_coords = [x, y];
-            		this.facing = "right";
-            		this.gears = ["none"];
-            		this.current_gear = 0;
-            		this.gear_count = 0;
-            		this.power = this.power_capacity * POWER_MULT;
-            	},
-            	
-            	reset_x_mom:function() {
-            		this.x_mom = 0;
-            	},
-            	
-            	reset_y_mom:function() {
-            		this.y_mom = 0;
-            	},
-            	
-            	reset_mom:function() {
-            		this.reset_x_mom();
-            		this.reset_y_mom();
-            	},
-            	
-            	respawn:function() {
-            		this.x = this.spawn_coords[0];
-            		this.y = this.spawn_coords[1];
-            	},
-            	
-            	fall:function() {
-            		if(this.falling){
-            			this.y_mom += GRAVITY;
-            		}
-            	},
-            	
-            	move_left:function() {
-            		this.x_mom = -(block_size / 20 * this.speed);
-            		this.facing = "left";
-            		this.power -= this.power_consumption;
-            	},
-            	
-            	move_right:function() {
-            		this.x_mom = block_size / 20 * this.speed;
-            		this.facing = "right";
-            		this.power -= this.power_consumption;
-            	},
-            	
-            	obtain_gear:function(gear) {
-            		for (g of this.gears){
-            			if (g == gear) {
-            				return;
-            			}
-            		}
-            		this.gears.push(gear);
-            	},
-            	
-            	shift_gear:function() {
-            		if (this.current_gear < this.gears.length - 1){
-            			this.current_gear ++;
-            		} else {this.current_gear = 0;}
-            	},
-            	
-            	jump:function() {
-            		if (this.falling){return;}
-            		if (this.gears[this.current_gear] != "none") {
-            			if (this.facing == "left"){
-            				this.x_mom -= block_size * this.gears[this.current_gear].x_mom;
-            			}
-            			if (this.facing == "right"){
-            				this.x_mom += block_size * this.gears[this.current_gear].x_mom;
-            			}
-            			this.y_mom -= block_size * this.gears[this.current_gear].y_mom;
-            		} else {console.log("no gear");}
-            	},
-            	
-            	update:function() {
-            		this.fall();
-            		this.x += this.x_mom;
-            		this.y += this.y_mom;
-            		this.falling = true;
-            		this.reset_mom();
-            		
-            		if(this.y >= current_level.height_in_px){
-            			this.respawn();
-            		}
-            	},
-            	
-            	draw_torso:function() {
-            		var torso_size = block_size * 0.5;
-            		
-            		canvas.fillStyle = silver(5);
-            		if (this.facing == "left"){
-            			canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
-            		}
-            		if (this.facing == "right"){
-            			canvas.fillRect(this.x - block_size / 2, this.y - torso_size / 2, torso_size, torso_size);
-            		}
-            		
-            	},
-            	
-            	draw_treads:function(){
-            		var tread_shift = 20;
-            		var treadY = this.y + tread_shift;
-            		var tread_width = block_size;
-            		
-            		canvas.fillStyle = "rgb(0, 0, 0)";
-            		canvas.beginPath();
-            		canvas.moveTo(this.x, treadY);
-            		canvas.lineTo(this.x - tread_width / 2, this.y + block_size / 2);
-            		canvas.lineTo(this.x + tread_width / 2, this.y + block_size / 2);
-            		canvas.fill();
-            	},
-            	
-            	draw_arms:function(){
-            		canvas.fillStyle = silver(7);
-            		if (this.facing == "left"){
-            			canvas.fillRect(this.x + this.arm_shift, this.y, -block_size / 3, block_size / 5);
-            		}
-            		if (this.facing == "right"){
-            			canvas.fillRect(this.x + this.arm_shift, this.y, block_size / 3, block_size / 5);
-            		}
-            	},
-            	
-            	draw_head:function(){
-            		canvas.fillStyle = silver(6);
-            		canvas.fillRect(this.x - block_size / 4, this.y - block_size / 2, block_size / 2, block_size / 4);
-            	},
-            	
-            	draw_hitbox:function(){
-            		canvas.fillStyle = "rgb(255, 255, 255)";
-            		canvas.fillRect(this.x - block_size / 2, this.y - block_size / 2, block_size, block_size);
-            	},
-            	
-            	draw:function() {
-            		//this.draw_hitbox();
-            		
-            		this.draw_torso();
-            		this.draw_treads();
-            		this.draw_arms();
-            		this.draw_head();
-            	},
-            	
-            	show_gear:function() {
-            	    if (this.gears[this.current_gear] == "none"){return};
-            	    draw_gear(canvas_size * 0.025, canvas_size * 0.925, 10, this.gears[this.current_gear].color, false);  
-            	},
-            	
-            	show_power:function() {
-            		canvas.fillStyle = silver(7);
-            		canvas.beginPath();
-            		canvas.arc(canvas_size * 0.25, canvas_size * 0.95, canvas_size / 40, 0, 2 * Math.PI);
-            		canvas.fill();
-            		
-            		canvas.fillStyle = silver(7);
-            		canvas.beginPath();
-            		canvas.arc(canvas_size * 0.75, canvas_size * 0.95, canvas_size / 40, 0, 2 * Math.PI);
-            		canvas.fill();
-            		
-            		canvas.fillStyle = energy_color;
-            		canvas.fillRect(canvas_size * 0.25, canvas_size * 0.925, (this.power / (this.power_capacity * POWER_MULT)) * canvas_size / 2, canvas_size / 20);
-            	},
-            	
-            	drawHUD:function() {
-            		if (this.showHUD){
-            			this.show_gear();
-            			this.show_power();
-            		}
-            	},
-            	
-            	reset_arm:function() {
-            		this.arm_shift = 0;
-            	}	
-            }
-
-			// Machine methods
-			Gear.prototype = {
-            	draw:function(){
-            		if (this.jump == "none"){
-            			this.jump.color = silver(7);
-            		}
-            		draw_gear(this.x - block_size / 4, this.y - block_size / 4, block_size / 10, this.jump.color, this.rotated);
-            	},
-            	
-            	update:function(){
-            		/*
-            		if (this.rotated){
-            			this.rotated = false;	
-            		}
-            		if (!this.rotated){
-            			this.rotated = true;
-            		}
-            		*/
-            		if (player.x >= this.x - block_size / 2 && player.x <= this.x + block_size / 2 && player.y >= this.y - block_size / 2 && player.y <= this.y + block_size / 2) {
-            			player.obtain_gear(this.jump);
-						
-						if (this.jump == "none"){
-							player.gear_count ++;
-						}
-						
-            			var to_remove = current_level.machines.indexOf(this);
-            			current_level.current_machines.splice(to_remove, 1);
-            			current_level.machines.splice(to_remove, 1);
-            		}
-            	}
-            }
-			
-			Generator.prototype = {
-            	draw:function() {
-            		canvas.fillStyle = silver(7);
-            		canvas.fillRect(this.x + block_size * 0.1, this.y - block_size, block_size * 0.8, block_size * 2);
-            		
-            		canvas.fillStyle = silver(4);
-            		canvas.fillRect(this.x, this.y - block_size, block_size, block_size / 2);
-            		canvas.fillRect(this.x, this.y + block_size / 2, block_size, block_size / 2);
-            		
-            		canvas.fillStyle = energy_color;
-            		canvas.fillRect(this.x + block_size * 0.4, this.y - block_size / 2, block_size / 5, block_size);
-            	},
-            	
-            	update:function() {
-            		current_level.add_energy(this.x + block_size, this.y);
-            	}
-            }
-            
-            Door.prototype = {
-            	check_coll:function(object) {
-            		while (object.y >= this.y && object.y <= this.y + block_size && object.x >= this.x + block_size && object.x <= this.x + block_size * 1.5){
-            			object.x += 1;
-            		}
-
-            		while (object.y >= this.y && object.y <= this.y + block_size && object.x + block_size / 2 >= this.x && object.x <= this.x + block_size / 2){
-            			object.x -= 1;
-            		}
-            	},
-            	
-            	draw:function() {
-            		if (!this.powered){
-            			canvas.fillStyle = silver(6);
-            			canvas.fillRect(this.x + block_size / 10, this.y, block_size * 0.8, block_size);
-            		
-            			canvas.fillStyle = "rgb(0, 0, 0)";
-            			canvas.fillRect(this.x + block_size / 10, this.y + block_size / 2, block_size * 0.8, 1);
-            		}
-
-            		canvas.fillStyle = silver(2);
-            		canvas.fillRect(this.x, this.y, block_size, block_size / 10);
-            		canvas.fillRect(this.x, this.y + block_size * 0.9, block_size, block_size / 10);
-            	},
-            	
-            	update:function() {
-            		if (!this.powered){
-            			this.check_coll(player);
-            		}
-            	}
-            	 
-            }
-            
-            Belt.prototype = {
-            	check_coll:function(object) {
-            		if (object.x > this.x && object.x < this.x + this.width && object.y + block_size / 2 >= this.y && object.y + block_size / 2 < this.y + block_size){
-            			object.falling = false;
-            			object.y = this.y - block_size / 2;
-            			
-            			if (!this.auto_on && !this.powered){return;}
-            			
-            			if (this.direction == "left") {
-            				object.x -= this.speed;
-            			}
-            			if (this.direction == "right") {
-            				object.x += this.speed;
-            			}
-            		}
-            	},
-            	
-            	draw:function() {
-            		canvas.fillStyle = "rgb(0, 0, 0)";
-            		canvas.fillRect(this.x, this.y, this.width, block_size / 2);
-            		
-            		canvas.fillStyle = silver(7);
-            		canvas.beginPath();
-            		canvas.arc(this.x, this.y + block_size / 4, block_size /4 , 0, 2 * Math.PI);
-            		canvas.fill();
-            		
-            		canvas.beginPath();
-            		canvas.arc(this.x + this.width, this.y + block_size / 4, block_size /4 , 0, 2 * Math.PI);
-            		canvas.fill();
-            	},
-            	
-            	update:function() {
-            		this.check_coll(player);
-            	}
-            }
-            
-            Tram.prototype = {
-            	draw:function(){
-            		canvas.fillStyle = silver(7);
-            		canvas.fillRect(this.x + block_size / 4, this.y, block_size / 2, block_size);
-            		canvas.fillRect(this.x, this.y + block_size * 0.75, block_size, block_size / 4);
-            		
-            		if (!this.auto_on && !this.powered){return;}
-            		
-            		canvas.fillStyle = energy_color;
-            		canvas.fillRect(this.x, this.y + block_size, block_size, block_size / 20);
-            	},
-            	
-            	update:function(){
-            		if (this.moving){
-            			this.follow_path();
-            			this.powered = true;
-            		}
-            		if (!this.powered && !this.auto_on){return;}
-            		
-            		if (!this.ready){return;}
-            		
-            		if (!player.magnetic){return;}
-					
-            		if (player.x >= this.x && player.x <= this.x + block_size && player.y > this.y + block_size * 1.5){
-            			player.y -= GRAVITY;
-            			player.falling = false;
-            			if (player.y > this.y + block_size * 1.5){return;}
-            			player.x = this.x + block_size / 2;
-            			this.moving = true;
-            		}
-            	},
-            	
-            	follow_path:function(){
-            		this.current_dest = this.destinations[this.dest_num];
-            		
-            		if (this.x > this.current_dest[0]){
-            			this.x -= 5;
-            		}
-            		 if (this.x < this.current_dest[0]){
-            			this.x += 5;
-            		}
-            		if (this.y > this.current_dest[1]){
-            			this.y -= 5;
-            		}
-            		if (this.y < this.current_dest[1]){
-            			this.y += 5;
-            		}
-            		else if (this.x == this.current_dest[0] && this.y == this.current_dest[1]){
-            			this.dest_num ++;
-            			if (this.dest_num + 1 == this.destinations.length){
-            				this.ready = false;
-            			}
-            			if (this.dest_num == this.destinations.length){
-            				this.dest_num = 0;
-            				this.ready = true;
-            				this.moving = false;
-            			}
-            		}
-            	}
-            }
-            
-            // not finished
-            Train.prototype = {
-            	draw:function(){
-            		canvas.fillStyle = silver(4);
-            		canvas.fillRect(this.x, this.y, this.width, block_size);
-            		
-            		for (gear of this.gears){
-            			if (gear) {
-            				draw_gear(this.x + this.gears.indexOf(gear) * block_size, this.y, block_size / 5, silver(2), true);
-            			}
-            		}
-            	},
-            	
-            	update:function(){
-            		return;
-            	}
-            }
-
-
-
 			// Canvas functions
             function assign_color(changes) {
                 for (var alter of changes) {
@@ -903,81 +256,48 @@
             	resume();
             }
             
-            function register_key(key) {
-            	pressed_key = key;
-            }
-            
-            function check_key(key) {
-            	if (key == null){return;}
-            	//console.log(key.keyCode);
-            	switch(key.keyCode){
-            		
-            		case 16: 
-            			player.shift_gear();
-            			break;
-            			
-            		case 32: 
-            			player.jump();
-            			break;
-            			
-            		case 37:
-            			player.move_left();
-            			break;
-            			
-            		case 38:
-            			player.jump();
-            			break;	
-            			
-            		case 39: 
-            			player.move_right();
-            			break;
-            			
-            		case 40: console.log("down");
-            			break;
-            			
-            		case 65:
-            			player.move_left();
-            			break;
-            			
-            		case 68:
-            			player.move_right();
-            			break;
-            		
-            		case 72:
-            			if (player.showHUD){
-            				player.showHUD = false;
-            			} else {player.showHUD = true;}
-            			break;
-            			
-            		case 80:
-            			if (timer_started){
+            function keyDown(event){
+                //console.log(event.key + " down");
+                switch(event.key){
+                    case 'a':
+                        player.moveLeft();
+                        break;
+                    case 'd':
+                        player.moveRight();
+                        break;
+                    case 'w':
+                        player.jump();
+                        break;
+                    case 'Shift':
+                        player.shiftGear();
+                        break;
+                    case 'p':
+                        if (timer_started){
             				pause();
             			} else {resume();}
             			break;
-            			
-            		case 83: console.log("s");
-            			break;
-            			
-            		case 87:
-            			player.jump();
-            			break;
-            			
-            		case 187:
-            			zoom("out");
-            			break;
-            			
-            		case 189:
-            			zoom("in");
-            			break;	
-            	}
+                }
             }
+            function keyUp(event){
+                //console.log(event.key + " up");
+                switch(event.key){
+                    case 'a':
+                        player.stop();
+                        break;
+                    case 'd':
+                        player.stop();
+                        break;
+                }
+            }
+            
+            document.addEventListener("keydown", keyDown);
+            document.addEventListener("keyup", keyUp);
             
             function update_frame() {
             	canvas.fillStyle = color3;
             	canvas.fillRect(0, 0, canvas_size, canvas_size);
             	
             	update_camera();
-            	check_key(pressed_key);
             	
             	player.update();
             	current_level.update();
@@ -988,20 +308,13 @@
             	reset_camera();
             	
             	player.drawHUD();
-            	
-            	pressed_key = null;
             }
-            
-    
     
 			var reg_jump = new Jump("Jump", 1.5, 1, color3);
             var far_jump = new Jump("Leap", 5, 0, color2);
             var high_jump = new Jump("Rocket", 0, 5, color1);
-
-
-    
-            // Temporary stuff
             
+            // Temporary stuff
             var test_area = [
             	[
             		[
@@ -1187,7 +500,7 @@
         </script>
     </head>
     
-    <body onload="load_page(); assign_color([['header', silver(8), silver(5)], ['game', 'Black', gold(9)], ['button', gold(5), gold(10)], ['description', color3, silver(8)], ['controls', silver(7), color2]]);"; onkeydown="register_key(event)"; id="body">
+    <body onload="load_page(); assign_color([['header', silver(8), silver(5)], ['game', 'Black', gold(9)], ['button', gold(5), gold(10)], ['description', color3, silver(8)], ['controls', silver(7), color2]]);"; id="body">
         
         <div id="header">
             <h1>GEARS</h1>
