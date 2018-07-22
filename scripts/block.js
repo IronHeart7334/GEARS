@@ -1,3 +1,4 @@
+var BLOCK_SIZE = 100;
 // Class constructors
 function Block(c, x, y, can_hit) {
     this.c = c;
@@ -17,11 +18,21 @@ Block.prototype = {
         canvas.fillRect(this.x + shift, this.y + shift, block_size - shift * 2, block_size - shift * 2);	
     },
 
-    top_coll:function(object) {
+    topColl:function(entity) {
+        var c = entity.getCollisionInfo();
+        if(!(this.left_coll(entity) || this.right_coll(entity))){
+            if(c.getRight() - 1 > this.x && c.getLeft() + 1 < this.x){
+                if(c.getBottom() > this.y && c.getTop() < this.y - BLOCK_SIZE / 2){
+                    entity.falling = false; //TODO: individual collisions reactions per entity
+                    entity.y = this.y - BLOCK_SIZE / 2;
+                }
+            }
+        }
+        /*
         if (object.x + 1 > this.x && object.x - 1 < this.x + block_size && object.y + block_size / 2 >= this.y && object.y + block_size / 2 < this.y + block_size){
             object.falling = false;
             object.y = this.y - block_size / 2;
-        }
+        }*/
     },
 
     bottom_coll:function(object){
@@ -40,5 +51,9 @@ Block.prototype = {
         while (object.y >= this.y && object.y <= this.y + block_size && object.x + block_size / 2 >= this.x && object.x <= this.x + block_size / 2){
             object.x -= 1;
         }
+    },
+    checkColl(entity){
+        this.topColl(entity); //autoinvokes other 2
+        this.bottom_coll(entity);
     }	
 }

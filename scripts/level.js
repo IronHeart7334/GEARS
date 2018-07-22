@@ -80,10 +80,7 @@ Level.prototype = {
     
     check_coll:function(object) {
         for (block of this.blocks){
-            block.top_coll(object);
-            block.bottom_coll(object);
-            block.left_coll(object);
-            block.right_coll(object);
+            block.checkColl(object);
         }
     },
     

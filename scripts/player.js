@@ -1,3 +1,5 @@
+var BLOCK_SIZE = 100;
+
 function Player() {
     this.facingMod = 1; // 1: right, -1: left
     this.x = 0;
@@ -61,6 +63,25 @@ Player.prototype = {
     },
     stop : function(){
         this.moving = false;
+    },
+    
+    getCollisionInfo : function(){
+        var p = this;
+        var ret = {
+            getTop : function(){
+                return p.y - BLOCK_SIZE / 2;
+            },
+            getBottom : function(){
+                return p.y + BLOCK_SIZE / 2;
+            },
+            getLeft : function(){
+                return p.x - BLOCK_SIZE / 2;
+            },
+            getRight : function(){
+                return p.x + BLOCK_SIZE / 2;
+            }
+        }
+        return ret;
     },
     
     obtain_gear:function(gear) {
