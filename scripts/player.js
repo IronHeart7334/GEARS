@@ -84,6 +84,19 @@ Player.prototype = {
         return ret;
     },
     
+    isWithin : function(x1, y1, x2, y2){
+        /*
+        x1, y1: upper left corner
+        x2, y2: lower right
+        */
+        return (
+            (this.x + BLOCK_SIZE / 2 >= x1) &&
+            (this.y - BLOCK_SIZE / 2 >= y1) &&
+            (this.x - BLOCK_SIZE / 2 <= x2) &&
+            (this.y + BLOCK_SIZE / 2 <= y2)
+        );
+    },
+    
     obtain_gear:function(gear) {
         var found = false;
         for (g of this.gears){
@@ -111,8 +124,8 @@ Player.prototype = {
     updateJump : function(){
         var jumpTime = FPS / 2; //time it takes to finish jump
         // the total amount moved after jumping
-        var totalX = this.gears[this.current_gear].xMom * block_size;
-        var totalY = this.gears[this.current_gear].yMom * block_size;
+        var totalX = this.gears[this.current_gear].xMom * BLOCK_SIZE;
+        var totalY = this.gears[this.current_gear].yMom * BLOCK_SIZE;
         
         this.x += totalX * this.facingMod / jumpTime;
         this.y -= totalY / jumpTime;
@@ -130,7 +143,7 @@ Player.prototype = {
         if(this.jumping){
             this.updateJump();
         } else if(this.moving){
-            this.moveX((block_size / FPS) * this.speed * this.facingMod);
+            this.moveX((BLOCK_SIZE / FPS) * this.speed * this.facingMod);
         }
         this.falling = true;
         if(this.y >= current_level.height_in_px){
@@ -139,12 +152,12 @@ Player.prototype = {
     },
     
     draw_torso:function() {
-        var torso_size = block_size * 0.5;
+        var torso_size = BLOCK_SIZE * 0.5;
         canvas.fillStyle = silver(5);
         if (this.facingMod === -1){
             canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
         } else {
-            canvas.fillRect(this.x - block_size / 2, this.y - torso_size / 2, torso_size, torso_size);
+            canvas.fillRect(this.x - BLOCK_SIZE / 2, this.y - torso_size / 2, torso_size, torso_size);
         }
         
     },
@@ -152,33 +165,33 @@ Player.prototype = {
     draw_treads:function(){
         var tread_shift = 20;
         var treadY = this.y + tread_shift;
-        var tread_width = block_size;
+        var tread_width = BLOCK_SIZE;
         
         canvas.fillStyle = "rgb(0, 0, 0)";
         canvas.beginPath();
         canvas.moveTo(this.x, treadY);
-        canvas.lineTo(this.x - tread_width / 2, this.y + block_size / 2);
-        canvas.lineTo(this.x + tread_width / 2, this.y + block_size / 2);
+        canvas.lineTo(this.x - tread_width / 2, this.y + BLOCK_SIZE / 2);
+        canvas.lineTo(this.x + tread_width / 2, this.y + BLOCK_SIZE / 2);
         canvas.fill();
     },
     
     draw_arms:function(){
         canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + this.arm_shift, this.y, (block_size / 3) * this.facingMod, block_size / 5);
+        canvas.fillRect(this.x + this.arm_shift, this.y, (BLOCK_SIZE / 3) * this.facingMod, BLOCK_SIZE / 5);
     },
     
     draw_head:function(){
         canvas.fillStyle = silver(6);
-        canvas.fillRect(this.x - block_size / 4, this.y - block_size / 2, block_size / 2, block_size / 4);
+        canvas.fillRect(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 2, BLOCK_SIZE / 4);
     },
     
     draw_hitbox:function(){
         canvas.fillStyle = "rgb(255, 255, 255)";
-        canvas.fillRect(this.x - block_size / 2, this.y - block_size / 2, block_size, block_size);
+        canvas.fillRect(this.x - BLOCK_SIZE / 2, this.y - BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE);
     },
     
     draw:function() {
-        //this.draw_hitbox();
+        this.draw_hitbox();
         
         this.draw_torso();
         this.draw_treads();
