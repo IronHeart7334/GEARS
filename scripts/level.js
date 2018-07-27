@@ -13,7 +13,7 @@ Level.prototype = {
         this.current_map = this.level_data[this.current_map_number][0];
         this.longest_row = 0;
         this.height = this.current_map.length;
-        this.height_in_px =  this.height * block_size;
+        this.height_in_px =  this.height * BLOCK_SIZE;
         for (var row = 0; row < this.current_map.length; row++) {
             for (var column = 0; column < this.current_map[row].length; column++){
                 
@@ -71,7 +71,7 @@ Level.prototype = {
     check_energy:function(machine) {
         machine.powered = false;
         for (coord_set of this.energy){
-            if (coord_set[0] == machine.x - block_size && coord_set[1] == machine.y){
+            if (coord_set[0] == machine.x - BLOCK_SIZE && coord_set[1] == machine.y){
                 machine.powered = true;
                 break;
             }
@@ -118,21 +118,21 @@ Level.prototype = {
     
     check_for_area:function(){
     
-        if (player.x < block_size / 2) {
+        if (player.x < BLOCK_SIZE / 2) {
         
             if (this.current_map_number > 0){
                 this.current_map_number -= 1;
                 this.load();
-                player.x = this.longest_row * block_size - block_size / 2;
+                player.x = this.longest_row * BLOCK_SIZE - BLOCK_SIZE / 2;
                 player.spawn_coords = [player.x, player.y];
             } 
         }
         
-        if (player.x > this.longest_row * block_size) {
+        if (player.x > this.longest_row * BLOCK_SIZE) {
             if (this.current_map_number < this.level_data.length - 1){
                 this.current_map_number += 1;
                 this.load();
-                player.x = block_size / 2;
+                player.x = BLOCK_SIZE / 2;
                 player.spawn_coords = [player.x, player.y];
             } 
         }

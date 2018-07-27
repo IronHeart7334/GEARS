@@ -1,5 +1,3 @@
-var BLOCK_SIZE = 100;
-
 function Player() {
     this.facingMod = 1; // 1: right, -1: left
     this.x = 0;
@@ -10,10 +8,12 @@ function Player() {
     this.falling = true;
     this.jumping = false;
     this.timeInJump = 0;
+    this.jumpX = 0;
+    this.jumpY = 0;
     
     this.magnetic = true;
     
-    this.speed = 5;
+    this.speed = blocksPerSecond(2);
 }
 Player.prototype = {
     load:function(x, y){
@@ -25,6 +25,8 @@ Player.prototype = {
         this.falling = true;
         this.jumping = false;
         this.timeInJump = 0;
+        this.jumpX = 0;
+        this.jumpY = 0;
         
         this.gears = ["none"];
         this.current_gear = 0;
@@ -44,6 +46,8 @@ Player.prototype = {
     respawn:function() {
         this.x = this.spawn_coords[0];
         this.y = this.spawn_coords[1];
+        this.jumpX = 0;
+        this.jumpY = 0;
     },
     fall:function() {
         // don't mess with my jumping
@@ -64,26 +68,6 @@ Player.prototype = {
     stop : function(){
         this.moving = false;
     },
-    
-    getCollisionInfo : function(){
-        var p = this;
-        var ret = {
-            getTop : function(){
-                return p.y - BLOCK_SIZE / 2;
-            },
-            getBottom : function(){
-                return p.y + BLOCK_SIZE / 2;
-            },
-            getLeft : function(){
-                return p.x - BLOCK_SIZE / 2;
-            },
-            getRight : function(){
-                return p.x + BLOCK_SIZE / 2;
-            }
-        }
-        return ret;
-    },
-    
     isWithin : function(x1, y1, x2, y2){
         /*
         x1, y1: upper left corner
@@ -119,20 +103,21 @@ Player.prototype = {
     jump : function() {
         if (this.gears[this.current_gear] != "none" && !this.falling) {
             this.jumping = true;
+            // the total amount moved after jumping
+            this.jumpX = this.gears[this.current_gear].xMom * BLOCK_SIZE;
+            this.jumpY = this.gears[this.current_gear].yMom * BLOCK_SIZE;
         } else {console.log("no gear");}
     },
     updateJump : function(){
         var jumpTime = FPS / 2; //time it takes to finish jump
-        // the total amount moved after jumping
-        var totalX = this.gears[this.current_gear].xMom * BLOCK_SIZE;
-        var totalY = this.gears[this.current_gear].yMom * BLOCK_SIZE;
-        
-        this.x += totalX * this.facingMod / jumpTime;
-        this.y -= totalY / jumpTime;
+        this.x += this.jumpX * this.facingMod / jumpTime;
+        this.y -= this.jumpY / jumpTime;
         this.timeInJump++;
         if(this.timeInJump >= jumpTime){
             this.timeInJump = 0;
             this.jumping = false;
+            this.jumpX = 0;
+            this.jumpY = 0;
         }
     },
     
@@ -191,7 +176,7 @@ Player.prototype = {
     },
     
     draw:function() {
-        this.draw_hitbox();
+        //this.draw_hitbox();
         
         this.draw_torso();
         this.draw_treads();

@@ -18,14 +18,13 @@ Block.prototype = {
     },
 
     topColl:function(entity) {
-        var c = entity.getCollisionInfo();
         if(!entity.isWithin(this.x, this.y + 1, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
             // not just clipping the side
             if(entity.isWithin(
-                this.x - ((BLOCK_SIZE / 2) + 1),
+                this.x + 1,
                 this.y - BLOCK_SIZE,
-                this.x + ((BLOCK_SIZE * 1.5) - 1),
-                this.y 
+                this.x + BLOCK_SIZE - 1,
+                this.y + BLOCK_SIZE / 2
                 )
             ){
                 entity.falling = false; //TODO: individual collisions reactions per entity
@@ -41,7 +40,7 @@ Block.prototype = {
             this.x,
             this.y + BLOCK_SIZE / 2,
             this.x + BLOCK_SIZE,
-            this.y + BLOCK_SIZE
+            this.y + BLOCK_SIZE * 1.5
         )){
             entity.y = this.y + BLOCK_SIZE * 1.5;
         } 

@@ -58,9 +58,13 @@
         	var FPS = 20;
         	var zoom_scale = 1;
         	var canvas_size = 700;
-        	var block_size = canvas_size / 10;
-        	var GRAVITY = block_size / 10;
+        	var BLOCK_SIZE = canvas_size / 10;
+        	var GRAVITY = blocksPerSecond(3);
         	var camera_shift = [canvas_size / 2, canvas_size * 0.67];
+        	
+        	function blocksPerSecond(blocks){
+        	    return BLOCK_SIZE * blocks / FPS;
+        	}
         	
         	function load_page() {
             	var body = document.getElementById("body");
@@ -113,8 +117,8 @@
         		}
         		
         		// right
-        		if (x_shift < canvas_size - current_level.longest_row * block_size) {
-        			x_shift = canvas_size - current_level.longest_row * block_size;
+        		if (x_shift < canvas_size - current_level.longest_row * BLOCK_SIZE) {
+        			x_shift = canvas_size - current_level.longest_row * BLOCK_SIZE;
         		}
         		
         		// top
@@ -123,8 +127,8 @@
         		}
         		
         		// bottom
-        		if (y_shift < canvas_size - current_level.height * block_size){
-        			y_shift = canvas_size - current_level.height * block_size;
+        		if (y_shift < canvas_size - current_level.height * BLOCK_SIZE){
+        			y_shift = canvas_size - current_level.height * BLOCK_SIZE;
         		}
         		
         		canvas.translate(x_shift, y_shift);

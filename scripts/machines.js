@@ -1,38 +1,38 @@
 // Machine Classes
 function Gear(x, y, jump){
-    this.x = x * block_size + block_size / 2;
-    this.y = y * block_size + block_size / 2;
+    this.x = x * BLOCK_SIZE + BLOCK_SIZE / 2;
+    this.y = y * BLOCK_SIZE + BLOCK_SIZE / 2;
     this.jump = jump;
     this.rotated = false;
 }
 
 function Generator(x, y) {
-    this.x = x * block_size;
-    this.y = y * block_size;
+    this.x = x * BLOCK_SIZE;
+    this.y = y * BLOCK_SIZE;
 }
 
 function Door(x, y) {
-    this.x = x * block_size;
-    this.y = y * block_size;
+    this.x = x * BLOCK_SIZE;
+    this.y = y * BLOCK_SIZE;
     this.powered = false;
 }
 
 function Belt(x, y, width, direction, speed, auto_on){
-    this.x = x * block_size;
-    this.y = y * block_size;
-    this.width = width * block_size;
+    this.x = x * BLOCK_SIZE;
+    this.y = y * BLOCK_SIZE;
+    this.width = width * BLOCK_SIZE;
     this.direction = direction;
     this.speed = speed;
     this.auto_on = auto_on;
 }
 
 function Tram(x, y, destinations, auto_on){
-    this.x = x * block_size;
-    this.y = y * block_size;
+    this.x = x * BLOCK_SIZE;
+    this.y = y * BLOCK_SIZE;
     this.auto_on = auto_on;
     this.destinations = [];
     for (dest of destinations){
-        this.destinations.push([dest[0] * block_size, dest[1] * block_size]);
+        this.destinations.push([dest[0] * BLOCK_SIZE, dest[1] * BLOCK_SIZE]);
     }
     this.destinations.push([this.x, this.y]);
     this.dest_num = 0;
@@ -42,9 +42,9 @@ function Tram(x, y, destinations, auto_on){
 
 // not finished
 function Train(x, y, width, gears){
-    this.x = x * block_size;
-    this.y = y * block_size;
-    this.width = width * block_size;
+    this.x = x * BLOCK_SIZE;
+    this.y = y * BLOCK_SIZE;
+    this.width = width * BLOCK_SIZE;
     this.gears = gears;
 }
 // Machine methods
@@ -53,7 +53,7 @@ Gear.prototype = {
         if (this.jump == "none"){
             this.jump.color = silver(7);
         }
-        draw_gear(this.x - block_size / 4, this.y - block_size / 4, block_size / 10, this.jump.color, this.rotated);
+        draw_gear(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 4, BLOCK_SIZE / 10, this.jump.color, this.rotated);
     },
     
     update:function(){
@@ -65,7 +65,7 @@ Gear.prototype = {
             this.rotated = true;
         }
         */
-        if (player.x >= this.x - block_size / 2 && player.x <= this.x + block_size / 2 && player.y >= this.y - block_size / 2 && player.y <= this.y + block_size / 2) {
+        if (player.x >= this.x - BLOCK_SIZE / 2 && player.x <= this.x + BLOCK_SIZE / 2 && player.y >= this.y - BLOCK_SIZE / 2 && player.y <= this.y + BLOCK_SIZE / 2) {
             player.obtain_gear(this.jump);
             
             if (this.jump == "none"){
@@ -82,28 +82,28 @@ Gear.prototype = {
 Generator.prototype = {
     draw:function() {
         canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + block_size * 0.1, this.y - block_size, block_size * 0.8, block_size * 2);
+        canvas.fillRect(this.x + BLOCK_SIZE * 0.1, this.y - BLOCK_SIZE, BLOCK_SIZE * 0.8, BLOCK_SIZE * 2);
         
         canvas.fillStyle = silver(4);
-        canvas.fillRect(this.x, this.y - block_size, block_size, block_size / 2);
-        canvas.fillRect(this.x, this.y + block_size / 2, block_size, block_size / 2);
+        canvas.fillRect(this.x, this.y - BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 2);
+        canvas.fillRect(this.x, this.y + BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE / 2);
         
         canvas.fillStyle = energy_color;
-        canvas.fillRect(this.x + block_size * 0.4, this.y - block_size / 2, block_size / 5, block_size);
+        canvas.fillRect(this.x + BLOCK_SIZE * 0.4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 5, BLOCK_SIZE);
     },
     
     update:function() {
-        current_level.add_energy(this.x + block_size, this.y);
+        current_level.add_energy(this.x + BLOCK_SIZE, this.y);
     }
 }
 
 Door.prototype = {
     check_coll:function(object) {
-        while (object.y >= this.y && object.y <= this.y + block_size && object.x >= this.x + block_size && object.x <= this.x + block_size * 1.5){
+        while (object.y >= this.y && object.y <= this.y + BLOCK_SIZE && object.x >= this.x + BLOCK_SIZE && object.x <= this.x + BLOCK_SIZE * 1.5){
             object.x += 1;
         }
 
-        while (object.y >= this.y && object.y <= this.y + block_size && object.x + block_size / 2 >= this.x && object.x <= this.x + block_size / 2){
+        while (object.y >= this.y && object.y <= this.y + BLOCK_SIZE && object.x + BLOCK_SIZE / 2 >= this.x && object.x <= this.x + BLOCK_SIZE / 2){
             object.x -= 1;
         }
     },
@@ -111,15 +111,15 @@ Door.prototype = {
     draw:function() {
         if (!this.powered){
             canvas.fillStyle = silver(6);
-            canvas.fillRect(this.x + block_size / 10, this.y, block_size * 0.8, block_size);
+            canvas.fillRect(this.x + BLOCK_SIZE / 10, this.y, BLOCK_SIZE * 0.8, BLOCK_SIZE);
         
             canvas.fillStyle = "rgb(0, 0, 0)";
-            canvas.fillRect(this.x + block_size / 10, this.y + block_size / 2, block_size * 0.8, 1);
+            canvas.fillRect(this.x + BLOCK_SIZE / 10, this.y + BLOCK_SIZE / 2, BLOCK_SIZE * 0.8, 1);
         }
 
         canvas.fillStyle = silver(2);
-        canvas.fillRect(this.x, this.y, block_size, block_size / 10);
-        canvas.fillRect(this.x, this.y + block_size * 0.9, block_size, block_size / 10);
+        canvas.fillRect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE / 10);
+        canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.9, BLOCK_SIZE, BLOCK_SIZE / 10);
     },
     
     update:function() {
@@ -132,9 +132,9 @@ Door.prototype = {
 
 Belt.prototype = {
     check_coll:function(object) {
-        if (object.x > this.x && object.x < this.x + this.width && object.y + block_size / 2 >= this.y && object.y + block_size / 2 < this.y + block_size){
+        if (object.x > this.x && object.x < this.x + this.width && object.y + BLOCK_SIZE / 2 >= this.y && object.y + BLOCK_SIZE / 2 < this.y + BLOCK_SIZE){
             object.falling = false;
-            object.y = this.y - block_size / 2;
+            object.y = this.y - BLOCK_SIZE / 2;
             
             if (!this.auto_on && !this.powered){return;}
             
@@ -149,15 +149,15 @@ Belt.prototype = {
     
     draw:function() {
         canvas.fillStyle = "rgb(0, 0, 0)";
-        canvas.fillRect(this.x, this.y, this.width, block_size / 2);
+        canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE / 2);
         
         canvas.fillStyle = silver(7);
         canvas.beginPath();
-        canvas.arc(this.x, this.y + block_size / 4, block_size /4 , 0, 2 * Math.PI);
+        canvas.arc(this.x, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
         canvas.fill();
         
         canvas.beginPath();
-        canvas.arc(this.x + this.width, this.y + block_size / 4, block_size /4 , 0, 2 * Math.PI);
+        canvas.arc(this.x + this.width, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
         canvas.fill();
     },
     
@@ -169,13 +169,13 @@ Belt.prototype = {
 Tram.prototype = {
     draw:function(){
         canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + block_size / 4, this.y, block_size / 2, block_size);
-        canvas.fillRect(this.x, this.y + block_size * 0.75, block_size, block_size / 4);
+        canvas.fillRect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
+        canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
         
         if (!this.auto_on && !this.powered){return;}
         
         canvas.fillStyle = energy_color;
-        canvas.fillRect(this.x, this.y + block_size, block_size, block_size / 20);
+        canvas.fillRect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
     },
     
     update:function(){
@@ -189,11 +189,11 @@ Tram.prototype = {
         
         if (!player.magnetic){return;}
         
-        if (player.x >= this.x && player.x <= this.x + block_size && player.y > this.y + block_size * 1.5){
+        if (player.x >= this.x && player.x <= this.x + BLOCK_SIZE && player.y > this.y + BLOCK_SIZE * 1.5){
             player.y -= GRAVITY * 2;
            // player.falling = false;
-            if (player.y > this.y + block_size * 1.5){return;}
-            player.x = this.x + block_size / 2;
+            if (player.y > this.y + BLOCK_SIZE * 1.5){return;}
+            player.x = this.x + BLOCK_SIZE / 2;
             this.moving = true;
         }
     },
@@ -231,11 +231,11 @@ Tram.prototype = {
 Train.prototype = {
     draw:function(){
         canvas.fillStyle = silver(4);
-        canvas.fillRect(this.x, this.y, this.width, block_size);
+        canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE);
         
         for (gear of this.gears){
             if (gear) {
-                draw_gear(this.x + this.gears.indexOf(gear) * block_size, this.y, block_size / 5, silver(2), true);
+                draw_gear(this.x + this.gears.indexOf(gear) * BLOCK_SIZE, this.y, BLOCK_SIZE / 5, silver(2), true);
             }
         }
     },
