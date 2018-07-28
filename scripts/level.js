@@ -22,26 +22,7 @@ Level.prototype = {
                 } 
                 
                 if (this.current_map[row][column] != 0){
-                    this.blocks.push(new Block(this.colors[this.current_map[row][column] - 1], column, row, true));
-                }	
-            }
-        }
-    },
-    
-    load_foreground:function(){
-        this.foreground_blocks = [];
-        this.current_map = this.level_data[this.current_map_number][1];
-        this.longest_row = 0;
-        this.height = this.current_map.length;
-        for (var row = 0; row < this.current_map.length; row++) {
-            for (var column = 0; column < this.current_map[row].length; column++){
-                
-                if (this.current_map[row].length > this.longest_row){
-                    this.longest_row = this.current_map[row].length;
-                } 
-                
-                if (this.current_map[row][column] != 0){
-                    this.foreground_blocks.push(new Block(this.colors[this.current_map[row][column] - 1], column, row, false));
+                    this.blocks.push(new Block(this.colors[this.current_map[row][column] - 1], column, row));
                 }	
             }
         }
@@ -49,7 +30,7 @@ Level.prototype = {
     
     load_machines:function() {
         this.machines = [];
-        this.current_machines = this.level_data[this.current_map_number][2];
+        this.current_machines = this.level_data[this.current_map_number][1];
         for (machine of this.current_machines) {
             this.machines.push(machine);
         }
@@ -57,7 +38,6 @@ Level.prototype = {
     
     load:function() {
         this.load_map();
-        this.load_foreground();
         this.load_machines();
     },
     
@@ -98,12 +78,6 @@ Level.prototype = {
         }
     },
     
-    draw_foreground:function() {
-        for (var block of this.foreground_blocks){
-            block.draw();
-        }
-    },
-    
     draw_machines:function() {
         for (machine of this.machines){
             machine.draw();
@@ -111,7 +85,6 @@ Level.prototype = {
     },
     
     draw:function() {
-        this.draw_foreground();
         this.draw_machines();
         this.draw_map();
     },
@@ -140,8 +113,8 @@ Level.prototype = {
     
     update:function() {
         this.check_for_area();
-        this.check_coll(player);
         this.update_machines();
+        this.check_coll(player);
     },
     
     run:function() {

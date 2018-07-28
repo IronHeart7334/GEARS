@@ -1,9 +1,24 @@
-var BLOCK_SIZE = 100;
-function Block(c, x, y, can_hit) {
+//works
+function extend(constructor, superConstructor){
+    var superProto = Object.create(superConstructor.prototype);
+    for(var method in superProto){
+        constructor.prototype[method] = superProto[method];
+    }
+}
+function test(){
+    function BlueBlock(){
+        Block.call(this, ["blue", "red"], 0, 0);
+    }
+    extend(BlueBlock, Block);
+    var x = new BlueBlock();
+    console.log(x);
+    return x;
+}
+
+function Block(c, x, y) {
     this.c = c;
     this.x = x * BLOCK_SIZE;
     this.y = y * BLOCK_SIZE;
-    this.can_hit = can_hit;
 }
 // Class methods
 Block.prototype = {
@@ -12,7 +27,6 @@ Block.prototype = {
         var shift = BLOCK_SIZE / 10;
         canvas.fillStyle = this.c[0];
         canvas.fillRect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE);
-        if (!this.can_hit){return};
         canvas.fillStyle = this.c[1];
         canvas.fillRect(this.x + shift, this.y + shift, BLOCK_SIZE - shift * 2, BLOCK_SIZE - shift * 2);	
     },
@@ -21,9 +35,9 @@ Block.prototype = {
         if(!entity.isWithin(this.x, this.y + 1, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
             // not just clipping the side
             if(entity.isWithin(
-                this.x + 1,
+                this.x + BLOCK_SIZE * 0.25,
                 this.y - BLOCK_SIZE,
-                this.x + BLOCK_SIZE - 1,
+                this.x + BLOCK_SIZE / 2,
                 this.y + BLOCK_SIZE / 2
                 )
             ){
@@ -34,12 +48,13 @@ Block.prototype = {
             console.log("no top collide b/c left or right");
         }
     },
-
-    bottom_coll:function(entity){
+    
+    //buggy
+    bottomColl:function(entity){
         if(entity.isWithin(
-            this.x,
+            this.x - 1,
             this.y + BLOCK_SIZE / 2,
-            this.x + BLOCK_SIZE,
+            this.x + BLOCK_SIZE + 1,
             this.y + BLOCK_SIZE * 1.5
         )){
             entity.y = this.y + BLOCK_SIZE * 1.5;
@@ -71,6 +86,6 @@ Block.prototype = {
         this.leftColl(entity);
         this.rightColl(entity);
         this.topColl(entity);
-        this.bottom_coll(entity);
+        this.bottomColl(entity);
     }	
 }
