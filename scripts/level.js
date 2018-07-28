@@ -7,6 +7,19 @@ function Level(name, colors, level_data, start) {
     this.start_coords = [start[1], start[2]];
 }
 Level.prototype = {
+    importDataFromFile : function(path){
+        // this is not working
+        var req = new XMLHttpRequest();
+        req.open("GET", path, true);
+        req.onreadystatechanged = function(){
+            if(req.readyState === 4){
+                if(req.status === 200 || req.status === 0){
+                    console.log(req.responseText);
+                }
+            }
+        }
+        req.send(null);
+    },
     
     load_map:function(){
         this.blocks = [];
