@@ -127,7 +127,8 @@ Player.prototype = {
         }
         if(this.jumping){
             this.updateJump();
-        } else if(this.moving){
+        } else if(this.moving && !this.falling){
+            //no moving in midair
             this.moveX((BLOCK_SIZE / FPS) * this.speed * this.facingMod);
         }
         this.falling = true;

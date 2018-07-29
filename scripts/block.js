@@ -1,15 +1,14 @@
-//works
-function extend(constructor, superConstructor){
-    var superProto = Object.create(superConstructor.prototype);
-    for(var method in superProto){
-        constructor.prototype[method] = superProto[method];
-    }
-}
+/*
+The Block class is used to generate the platforms that the player interacts with.
+*/
 
-
-
-// the base class for blocks
 function Block(baseColor, rimColor, x, y) {
+    /*
+    baseColor: the color of this block
+    rimColor: the color of the frame around the block
+    x: the number of blocks between this one and the leftmost side of the area it is in
+    y: the number of blocks above this one and the top of the area it is in
+    */
     this.baseColor = baseColor;
     this.rimColor = rimColor;
     this.x = x * BLOCK_SIZE;
@@ -24,6 +23,10 @@ Block.prototype = {
         canvas.fillRect(this.x + shift, this.y + shift, BLOCK_SIZE - shift * 2, BLOCK_SIZE - shift * 2);	
     },
     topColl:function(entity) {
+        // returns whether or not entity is above this, though colliding with it,
+        // also moves the entity to just above this and prevents it from falling
+        
+        var ret = false;
         if(!entity.isWithin(this.x, this.y + 1, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
             // not just clipping the side
             if(entity.isWithin(
@@ -33,12 +36,14 @@ Block.prototype = {
                 this.y + BLOCK_SIZE / 2
                 )
             ){
+                ret = true;
                 entity.falling = false; //TODO: individual collisions reactions per entity
                 entity.y = this.y - BLOCK_SIZE / 2;
             }
         } else {
             console.log("no top collide b/c left or right");
         }
+        return ret;
     },
     //buggy
     bottomColl:function(entity){
@@ -80,7 +85,7 @@ Block.prototype = {
 }
 
 
-
+// subclasses
 function MetalBlock(x, y){
     Block.call(this, silver(4), silver(3), x, y);
 }
@@ -92,8 +97,11 @@ function GoldBlock(x, y){
 extend(GoldBlock, Block);
 
 
+// test functions
 function testAllColorFunction(f){
     //f is either silver or gold
+    //tests all possible combinations of
+    // f(1-10) for a block's main and rim colors
     pause();
     for(var i = 1; i < 11; i++){
         for(var j = 0; j < 11; j++){

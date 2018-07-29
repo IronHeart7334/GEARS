@@ -3,6 +3,7 @@
     <head>
         <title> GEARS </title>
         <meta name="Creator" content="Matt Crow">
+        <script src="scripts/utilities.js"></script>
         <script src="scripts/level.js"></script>
         <script src="scripts/block.js"></script>
         <script src="scripts/jump.js"></script>
@@ -13,29 +14,6 @@
             div {
                 border-style: groove;
                 border-width: 10px;
-            }
-            #header {
-                position:absolute;
-                left:100px;
-                top:100px;
-                width:1000px;
-                height:100px;
-                text-align: center;
-            }
-            #game {
-                position:absolute;
-                left:100px;
-                top:220px;
-                width:700px;
-                height:700px;
-            }
-            #button {
-                position:absolute;
-                left:1120px;
-                top:1120px;
-                width:100px;
-                height:100px;
-                text-align: center;
             }
             #controls {
                 position:absolute;
@@ -73,26 +51,11 @@
             	fresh_canvas.width = canvas_size;
             	fresh_canvas.height = canvas_size;
             	fresh_canvas.style.position = "absolute";
-            	fresh_canvas.style.top = "230px";
-            	fresh_canvas.style.left = "110px";
+            	fresh_canvas.style.top = "0px";
+            	fresh_canvas.style.left = "0px";
             	body.appendChild(fresh_canvas);
             	base_canvas = document.getElementById("canvas");
 			    canvas = base_canvas.getContext("2d");
-			    
-			    /*
-			    var header = document.createElement("h1");
-			    header.id = "header";
-			    header.width = canvas_size;
-			    header.height = canvas_size / 5;
-			    header.style.border = "thick solid blue";
-			    body.appendChild(header);
-			    */
-			    
-			    var header = document.getElementById("header");
-			    
-			    header.width = canvas_size;
-			    console.log(header);
-			    
             }
         	
         	// Camera functions
@@ -417,19 +380,7 @@
         </script>
     </head>
     
-    <body onload="load_page(); assign_color([['header', silver(8), silver(5)], ['game', 'Black', gold(9)], ['button', gold(5), gold(10)], ['controls', silver(7), color2]]);"; id="body">
-        
-        <div id="header">
-            <h1>GEARS</h1>
-            <i>Gear engine and robot sidescroller.</i>
-        </div>
-        
-        <div id="game"></div>
-        
-        <div id="button" onclick="load_game()"> 
-            <h1>Play</h1>
-        </div>
-        
+    <body onload="load_page(), load_game()"; assign_color([['controls', silver(7), color2]]);"; id="body">
         <div id="controls">
         	<h2>Controls</h2>
         	
