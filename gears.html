@@ -318,7 +318,7 @@
             			[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             			[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             			[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            			[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 0, 1],
+            			[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
             			[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             			[1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
             		],
@@ -408,8 +408,8 @@
             	]
             ];
             
-            var test_level = new Level("Test", [[silver(3), silver(5)], [gold(7), gold(9)], [energy_color, silver(8)]], test_area, [0, 150, 200]);
-            var mountain_level = new Level("Mountain", [[silver(1), silver(2)], [], [], [], [], ["rgb(0, 100, 255)", "rgb(0, 100, 255)"]], mountain, [0, 300, 400]);
+            var test_level = new Level("Test", [MetalBlock, GoldBlock], test_area, [0, 150, 200]);
+            //var mountain_level = new Level("Mountain", [[silver(1), silver(2)], [], [], [], [], ["rgb(0, 100, 255)", "rgb(0, 100, 255)"]], mountain, [0, 300, 400]);
             
             var current_level = test_level;
             var player = new Player();

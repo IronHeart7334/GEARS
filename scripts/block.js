@@ -5,32 +5,24 @@ function extend(constructor, superConstructor){
         constructor.prototype[method] = superProto[method];
     }
 }
-function test(){
-    function BlueBlock(){
-        Block.call(this, ["blue", "red"], 0, 0);
-    }
-    extend(BlueBlock, Block);
-    var x = new BlueBlock();
-    console.log(x);
-    return x;
-}
 
-function Block(c, x, y) {
-    this.c = c;
+
+
+// the base class for blocks
+function Block(baseColor, rimColor, x, y) {
+    this.baseColor = baseColor;
+    this.rimColor = rimColor;
     this.x = x * BLOCK_SIZE;
     this.y = y * BLOCK_SIZE;
 }
-// Class methods
 Block.prototype = {
-
     draw:function(){
         var shift = BLOCK_SIZE / 10;
-        canvas.fillStyle = this.c[0];
+        canvas.fillStyle = this.rimColor;
         canvas.fillRect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE);
-        canvas.fillStyle = this.c[1];
+        canvas.fillStyle = this.baseColor;
         canvas.fillRect(this.x + shift, this.y + shift, BLOCK_SIZE - shift * 2, BLOCK_SIZE - shift * 2);	
     },
-
     topColl:function(entity) {
         if(!entity.isWithin(this.x, this.y + 1, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
             // not just clipping the side
@@ -48,7 +40,6 @@ Block.prototype = {
             console.log("no top collide b/c left or right");
         }
     },
-    
     //buggy
     bottomColl:function(entity){
         if(entity.isWithin(
@@ -60,7 +51,6 @@ Block.prototype = {
             entity.y = this.y + BLOCK_SIZE * 1.5;
         } 
     },
-
     leftColl:function(entity) {
         if(entity.isWithin(
             this.x,
@@ -71,7 +61,6 @@ Block.prototype = {
             entity.x = this.x - BLOCK_SIZE / 2;
         }
     },
-
     rightColl:function(entity) {
         if(entity.isWithin(
             this.x + BLOCK_SIZE / 2,
@@ -88,4 +77,33 @@ Block.prototype = {
         this.topColl(entity);
         this.bottomColl(entity);
     }	
+}
+
+
+
+function MetalBlock(x, y){
+    Block.call(this, silver(4), silver(3), x, y);
+}
+extend(MetalBlock, Block);
+
+function GoldBlock(x, y){
+    Block.call(this, gold(10), gold(4), x, y);
+}
+extend(GoldBlock, Block);
+
+
+function testAllColorFunction(f){
+    //f is either silver or gold
+    pause();
+    for(var i = 1; i < 11; i++){
+        for(var j = 0; j < 11; j++){
+            new Block(f(i), f(j), i - 1, j - 1).draw();
+        }
+    }
+}
+function testAllSilver(){
+    testAllColorFunction(silver);
+}
+function testAllGold(){
+    testAllColorFunction(gold);
 }

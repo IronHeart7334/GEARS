@@ -1,7 +1,7 @@
 // this can be improved
-function Level(name, colors, level_data, start) {
+function Level(name, blockConstructors, level_data, start) {
     this.name = name;
-    this.colors = colors;
+    this.blockConstructors = blockConstructors;
     this.level_data = level_data;
     this.current_map_number = start[0];
     this.start_coords = [start[1], start[2]];
@@ -35,7 +35,7 @@ Level.prototype = {
                 } 
                 
                 if (this.current_map[row][column] != 0){
-                    this.blocks.push(new Block(this.colors[this.current_map[row][column] - 1], column, row));
+                    this.blocks.push(new this.blockConstructors[this.current_map[row][column] - 1](column, row));
                 }	
             }
         }
