@@ -12,21 +12,6 @@ function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
     */
     "use strict";
     try{
-        function isFunction(check){
-            return typeof check === typeof function(){};
-        }
-        function max(array){
-            var ret = -Infinity;
-            function isMax(value){
-                if(value > ret){
-                    ret = value;
-                }
-            }
-            array.forEach(isMax);
-            return ret;
-        }
-        
-        
         // make sure blockConstructors is valid
         if(!Array.isArray(blockConstructors)){
             throw new TypeError("blockConstructors must be an array of functions extending Block");
@@ -47,11 +32,97 @@ function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
             throw new RangeError("cannot have block in map with id over " + blockConstructors.length);
         }
         
+        // check machines
+        if(!Array.isArray(machines)){
+            throw new TypeError("machines must be an array");
+        }
+        //TODO: add checking for extention
+        
+        // check spawns
+        if(!Array.isArray(leftSpawn) || !Array.isArray(rightSpawn)){
+            throw new TypeError("leftSpawn and rightSpawn must be arrays");
+        }
+        if(leftSpawn.length != 2 || rightSpawn.length != 2){
+            throw new RangeError("left and right spawn should contain exactly 2 elements");
+        }
+        
     } catch(e){
         console.log(e.stack);
     }
     this.blockConstructors = blockConstructors;
     this.blockMap = blockMap;
+    this.machines = machines;
+    this.leftSpawn = leftSpawn;
+    this.rightSpawn = rightSpawn;
+}
+Area.prototype = {
+    loadMap : function(){
+        /* 
+        loads all the blocks into this area's 'memory'.
+        Only need to run once, saving lots of time
+        */
+        
+        var map = this.blockMap;
+        var longestRow = 0;
+        
+        this.blocks = [];
+        
+        for(var row = 0; row < map.length; row++){
+            if(map[row].length > longestRow){
+                longestRow = map[row].length;
+            }
+            for(var column = 0; column < map[row].length; column++){
+                if(map[row][column] !== 0){
+                    // a 0 corresponds to 'no block', a 1 is the block type at index 0 of blockConstructors etc.
+                    this.blocks.push(new this.blockConstructors[map[row][column] - 1](column, row));
+                }
+            }
+        }
+        
+        this.height = map.length * BLOCK_SIZE;
+        this.width = longestRow * BLOCK_SIZE;
+    },
+    
+    //energy functions have to do with machines
+    // will redo once machines are improved
+    updateMachines : function(){
+        this.energy = []; // needs to be added by machine
+        
+        //improve this
+        function within(machine){
+            return function(coords){
+                return coords[0] === machine.x - BLOCK_SIZE && coords[1] === machine.y;
+            }
+        }
+        for(machine of this.machines){
+            if(this.energy.some(within(machine))){
+                machine.powered = true;
+            } else {
+                machine.powered = false;
+            }
+            machine.update();
+        }
+    },
+    //not implemented yet
+    addEnergy : function(x, y){
+        this.energy.push([x, y]);
+    },
+    
+    checkColl : function(entity){
+        for(var block of this.blocks){
+            block.checkColl(entity);
+        }
+    },
+    
+    draw : function(){
+        this.blocks.forEach(function(block){block.draw();});
+        this.machines.forEach(function(machine){machine.draw();});
+    },
+    
+    update : function(){
+        this.updateMachines();
+        this.checkColl(player); //improve later
+    }
 }
 
 
