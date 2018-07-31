@@ -1,8 +1,114 @@
+//not done
+function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
+    /*
+    Parameters:
+        blockConstructors : an array of functions, each of which is the constructor of a class extending Block.
+                            the function should accept 2 parameters: an x-block offset, and a y-block offset 
+                            (see blocks.js for details)
+        blockMap : an array of arrays of integers (see loadMap for details)
+        machines : an array of objects inheriting from Machine
+        leftSpawn : an array of two integers : the x and y block offset that the player will spawn from when entering this area from the left side
+        rightSpawn : equivolent of leftSpawn, but when approaching from the right side
+    */
+    "use strict";
+    try{
+        function isFunction(check){
+            return typeof check === typeof function(){};
+        }
+        function max(array){
+            var ret = -Infinity;
+            function isMax(value){
+                if(value > ret){
+                    ret = value;
+                }
+            }
+            array.forEach(isMax);
+            return ret;
+        }
+        
+        
+        // make sure blockConstructors is valid
+        if(!Array.isArray(blockConstructors)){
+            throw new TypeError("blockConstructors must be an array of functions extending Block");
+        }
+        if(!blockConstructors.every(function(element){return isFunction(element); })){
+            throw new TypeError("invalid element in blockConstructors");
+        }
+        //TODO: add checking for extention
+        
+        // check blockMap
+        if(blockMap[0][0] === undefined){
+            throw new RangeError("block map must be an array of arrays of integers");
+        }
+        if(!blockMap.every(function(array){return array.every(Number.isInteger)})){
+            throw new TypeError("all elements in block map must be integers");
+        }
+        if(max(blockMap) > blockConstructors.length){
+            throw new RangeError("cannot have block in map with id over " + blockConstructors.length);
+        }
+        
+    } catch(e){
+        console.log(e.stack);
+    }
+    this.blockConstructors = blockConstructors;
+    this.blockMap = blockMap;
+}
+
+
 // this can be improved
-function Level(name, blockConstructors, level_data, start) {
+function Level(name, blockConstructors, levelData, start) {
+    /*
+    Parameters:
+        name : a String, currently unused, but will be used in level select later
+        blockConstructors : an array of functions, each of which is the constructor of a class extending Block.
+                            the function should accept 2 parameters: an x-block offset, and a y-block offset 
+                            (see blocks.js for details)
+        levelData : *sigh* need to redo. A group of nested arrays:
+                    [
+                        [
+                            [
+                                [0, 0, 0...],
+                                [0, 0, 0...],
+                                [0, 0, 0...]...
+                            ],
+                            [
+                                new Gear(...),
+                                ...
+                            ]
+                        ],
+                        [
+                            [
+                                [0, 0, 0...],
+                                [0, 0, 0...],
+                                [0, 0, 0...]...
+                            ],
+                            [
+                                new Gear(...),
+                                ...
+                            ]
+                        ],
+                        [
+                            [
+                                [0, 0, 0...],
+                                [0, 0, 0...],
+                                [0, 0, 0...]...
+                            ],
+                            [
+                                new Gear(...),
+                                ...
+                            ]
+                        ]...
+                    ]
+                    where a[0] is the leftmost area in the level, 
+                    a[0][0] is the block map for that area,
+                    and a[0][1] is the machines for that area
+        
+        start is an array of 3 items: the starting map number, and the x and y coordinates.
+                                        this denotes where the player will spawn.
+    */
     this.name = name;
     this.blockConstructors = blockConstructors;
-    this.level_data = level_data;
+    this.level_data = levelData;
     this.current_map_number = start[0];
     this.start_coords = [start[1], start[2]];
 }
