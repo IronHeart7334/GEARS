@@ -16,10 +16,8 @@ function Player() {
     this.speed = blocksPerSecond(2);
 }
 Player.prototype = {
-    load:function(x, y){
-        this.x = x;
-        this.y = y;
-        this.spawn_coords = [x, y];
+    init : function(x, y){
+        this.load(x, y);
         this.facingMod = 1;
         this.moving = false;
         this.falling = true;
@@ -31,6 +29,12 @@ Player.prototype = {
         this.gears = ["none"];
         this.current_gear = 0;
         this.gear_count = 0;
+    },
+    
+    load : function(x, y){
+        this.x = x;
+        this.y = y;
+        this.spawn_coords = [x, y];
     },
     
     move : function(x, y){

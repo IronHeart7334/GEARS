@@ -4,6 +4,7 @@ function Gear(x, y, jump){
     this.y = y * BLOCK_SIZE + BLOCK_SIZE / 2;
     this.jump = jump;
     this.rotated = false;
+    this.claimed = false;
 }
 
 function Generator(x, y) {
@@ -50,10 +51,12 @@ function Train(x, y, width, gears){
 // Machine methods
 Gear.prototype = {
     draw:function(){
-        if (this.jump == "none"){
-            this.jump.color = silver(7);
+        if(!this.claimed){
+            if (this.jump == "none"){
+                this.jump.color = silver(7);
+            }
+            draw_gear(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 4, BLOCK_SIZE / 10, this.jump.color, this.rotated);
         }
-        draw_gear(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 4, BLOCK_SIZE / 10, this.jump.color, this.rotated);
     },
     
     update:function(){
@@ -65,16 +68,13 @@ Gear.prototype = {
             this.rotated = true;
         }
         */
-        if (player.x >= this.x - BLOCK_SIZE / 2 && player.x <= this.x + BLOCK_SIZE / 2 && player.y >= this.y - BLOCK_SIZE / 2 && player.y <= this.y + BLOCK_SIZE / 2) {
+        if (!this.claimed && player.x >= this.x - BLOCK_SIZE / 2 && player.x <= this.x + BLOCK_SIZE / 2 && player.y >= this.y - BLOCK_SIZE / 2 && player.y <= this.y + BLOCK_SIZE / 2) {
             player.obtain_gear(this.jump);
+            this.claimed = true;
             
             if (this.jump == "none"){
                 player.gear_count ++;
             }
-            
-            var to_remove = current_level.machines.indexOf(this);
-            current_level.current_machines.splice(to_remove, 1);
-            current_level.machines.splice(to_remove, 1);
         }
     }
 }
