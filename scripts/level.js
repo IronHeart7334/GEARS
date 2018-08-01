@@ -52,8 +52,8 @@ function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
     this.blockConstructors = blockConstructors;
     this.blockMap = blockMap;
     this.machines = machines;
-    this.leftSpawn = leftSpawn;
-    this.rightSpawn = rightSpawn;
+    this.leftSpawn = leftSpawn * BLOCK_SIZE;
+    this.rightSpawn = rightSpawn * BLOCK_SIZE;
 }
 Area.prototype = {
     loadMap : function(){
@@ -122,10 +122,37 @@ Area.prototype = {
     update : function(){
         this.updateMachines();
         this.checkColl(player); //improve later
+    },
+    
+    contains : function(entity){
+        // returns whether or not an entity is within the bounds of this area
+        return entity.within(0, 0, this.width, -this.height);
+    },
+    
+    loadPlayerLeft : function(entity){
+        entity.load(this.leftSpawn[0], this.leftSpawn[1]);
+    },
+    
+    loadPlayerRight : function(entity){
+        entity.load(this.rightSpawn[0], this.rightSpawn[1]);
     }
 }
 
-
+/*
+importDataFromFile : function(path){
+        // this is not working
+        var req = new XMLHttpRequest();
+        req.open("GET", path, true);
+        req.onreadystatechanged = function(){
+            if(req.readyState === 4){
+                if(req.status === 200 || req.status === 0){
+                    console.log(req.responseText);
+                }
+            }
+        }
+        req.send(null);
+    }
+*/
 // this can be improved
 function Level(name, blockConstructors, levelData, start) {
     /*
@@ -309,5 +336,44 @@ Level.prototype = {
     
     run:function() {
         player.load(this.start_coords[0], this.start_coords[1]);
+    }
+}
+
+//need to implement
+function Level2(name, areas, startAreaNumber, spawnsOnLeft){
+    this.name = name;
+    this.areas = areas;
+    this.start = startAreaNumber;
+    this.spawnLeft = spawnsOnLeft;
+}
+Level2.prototype = {
+    load : function(){
+        //loads the area data into memory, does not start the level
+        this.areas.forEach(function(area){area.loadMap();});
+    },
+    play : function(player){
+        if(this.spawnLeft){
+            this.areas[this.start].loadPlayerLeft(player);
+        } else {
+            this.areas[this.start].loadPlayerRight(player);
+        }
+        this.currentArea = this.start;
+    },
+    update : function(){
+        if(!this.areas[this.currentArea].contains(player)){
+            //no longer in area
+            if(player.x < 0){
+                //exit left
+                if(this.currentArea > 0){
+                    this.currentArea--;
+                    this.areas[this.currentArea].loadPlayerRight(player);
+                }
+            } else if(this.currentArea < this.areas.length){
+                //if not contains, and doesn't exit left, check if can exit right
+                this.currentArea++;
+                this.areas[this.currentArea].loadPlayerLeft(player);
+            }
+        }
+        this.areas[this.currentArea].update();
     }
 }
