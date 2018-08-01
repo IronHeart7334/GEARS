@@ -52,8 +52,9 @@ function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
     this.blockConstructors = blockConstructors;
     this.blockMap = blockMap;
     this.machines = machines;
-    this.leftSpawn = leftSpawn * BLOCK_SIZE;
-    this.rightSpawn = rightSpawn * BLOCK_SIZE;
+    // + 0.5 is for a half-block offset
+    this.leftSpawn = [(leftSpawn[0] + 0.5) * BLOCK_SIZE, (leftSpawn[1] + 0.5) * BLOCK_SIZE];
+    this.rightSpawn = [(rightSpawn[0] + 0.5) * BLOCK_SIZE, (rightSpawn[1] + 0.5) * BLOCK_SIZE];
 }
 Area.prototype = {
     loadMap : function(){
@@ -120,13 +121,13 @@ Area.prototype = {
     },
     
     update : function(){
-        this.updateMachines();
+        //this.updateMachines();
         this.checkColl(player); //improve later
     },
     
     contains : function(entity){
         // returns whether or not an entity is within the bounds of this area
-        return entity.within(0, 0, this.width, -this.height);
+        return entity.isWithin(0, 0, this.width, -this.height);
     },
     
     loadPlayerLeft : function(entity){
@@ -359,8 +360,11 @@ Level2.prototype = {
         }
         this.currentArea = this.start;
     },
+    draw : function(){
+        this.areas[this.currentArea].draw();
+    },
     update : function(){
-        if(!this.areas[this.currentArea].contains(player)){
+        if(false && !this.areas[this.currentArea].contains(player)){
             //no longer in area
             if(player.x < 0){
                 //exit left
