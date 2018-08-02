@@ -135,7 +135,8 @@
             	[gold(4), gold(9)]
             ];
 
-			function draw_gear(x, y, size, color, rotated){
+			function drawGear(x, y, width, color, rotated){
+				var size = width / 5;
 				var gear1 = [
 					[1, 0, 1, 0, 1],
 					[0, 1, 1, 1, 0],
@@ -224,7 +225,7 @@
             document.addEventListener("keyup", keyUp);
             
             function update_frame() {
-            	canvas.fillStyle = color3;
+            	canvas.fillStyle = "black";
             	canvas.fillRect(0, 0, canvas_size, canvas_size);
             	
             	update_camera();

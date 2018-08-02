@@ -1,11 +1,115 @@
-// Machine Classes
-function Gear(x, y, jump){
-    this.x = x * BLOCK_SIZE + BLOCK_SIZE / 2;
-    this.y = y * BLOCK_SIZE + BLOCK_SIZE / 2;
-    this.jump = jump;
-    this.rotated = false;
-    this.claimed = false;
+// abstract base class for machines
+// todo: add power methods
+function Machine(x, y){
+    this.x = x * BLOCK_SIZE;
+    this.y = y * BLOCK_SIZE;
 }
+Machine.prototype = {
+    draw : function(){
+        var obj = this;
+        throw new Error("No draw method found for " + obj);
+    },
+    collide : function(entity){
+        //each subclass defines
+    },
+    checkForCollide : function(entity){
+        var collide = false;
+        if(entity.isWithin(this.x, this.y, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
+            this.collide(entity);
+            collide = true;
+        }
+        return collide;
+    },
+    update : function(){
+        var obj = this;
+        throw new Error("No update method found for " + obj);
+    }
+}
+
+function Gear(x, y, jump){
+    Machine.call(this, x, y);
+    this.jump = jump;
+    this.claimed = false;
+    this.rotated = false;
+    this.rotateCount = 0;
+}
+extend(Gear, Machine);
+//need to define each seperately to prevent overwriting entire prototype
+Gear.prototype.draw = function(){
+    if(!this.claimed){
+        drawGear(this.x, this.y, BLOCK_SIZE, this.jump.color, this.rotated);
+    }
+}
+Gear.prototype.collide = function(entity){
+    try{
+        entity.obtain_gear(this.jump);
+        this.claimed = true;
+    } catch(e){
+        //not a Player
+    }
+}
+Gear.prototype.update = function(){
+    if(!this.claimed){
+        if(this.rotateCount === FPS){
+            this.rotated = !this.rotated;
+            this.rotateCount = 0;
+        }
+        this.rotateCount++;
+    }
+}
+
+
+
+function Belt(x, y, width, movesRight, autoOn){
+    Machine.call(this, x, y);
+    this.width = width * BLOCK_SIZE;
+    this.movesRight = movesRight;
+    this.autoOn = autoOn;
+}
+extend(Belt, Machine);
+Belt.prototype.checkForCollide = function(entity){
+    var collide = false;
+    if(entity.isWithin(this.x, this.y, this.x + this.width, this.y + BLOCK_SIZE)){
+        collide = true;
+        this.collide(entity);
+    }
+    return collide;
+}
+Belt.prototype.draw = function(){
+    canvas.fillStyle = "rgb(0, 0, 0)";
+    canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE / 2);
+
+    canvas.fillStyle = silver(7);
+    canvas.beginPath();
+    canvas.arc(this.x, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
+    canvas.fill();
+
+    canvas.beginPath();
+    canvas.arc(this.x + this.width, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
+    canvas.fill();
+}
+Belt.prototype.collide = function(entity){
+    var speed = blocksPerSecond(1);
+    entity.y = this.y - BLOCK_SIZE / 2; // maybe add padding attribute to objects
+    entity.falling = false;
+    if(this.movesRight){
+        entity.moveX(speed);
+    } else {
+        entity.moveX(-speed);
+    }
+}
+Belt.prototype.update = function(){
+    //do nothing
+}
+
+
+
+function Tram(x, y, destinations, autoOn){
+    Machine.call(this, x, y);
+    
+}
+
+// Machine Classes
 
 function Generator(x, y) {
     this.x = x * BLOCK_SIZE;
@@ -16,15 +120,6 @@ function Door(x, y) {
     this.x = x * BLOCK_SIZE;
     this.y = y * BLOCK_SIZE;
     this.powered = false;
-}
-
-function Belt(x, y, width, direction, speed, auto_on){
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
-    this.width = width * BLOCK_SIZE;
-    this.direction = direction;
-    this.speed = speed;
-    this.auto_on = auto_on;
 }
 
 function Tram(x, y, destinations, auto_on){
@@ -49,35 +144,6 @@ function Train(x, y, width, gears){
     this.gears = gears;
 }
 // Machine methods
-Gear.prototype = {
-    draw:function(){
-        if(!this.claimed){
-            if (this.jump == "none"){
-                this.jump.color = silver(7);
-            }
-            draw_gear(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 4, BLOCK_SIZE / 10, this.jump.color, this.rotated);
-        }
-    },
-    
-    update:function(){
-        /*
-        if (this.rotated){
-            this.rotated = false;	
-        }
-        if (!this.rotated){
-            this.rotated = true;
-        }
-        */
-        if (!this.claimed && player.x >= this.x - BLOCK_SIZE / 2 && player.x <= this.x + BLOCK_SIZE / 2 && player.y >= this.y - BLOCK_SIZE / 2 && player.y <= this.y + BLOCK_SIZE / 2) {
-            player.obtain_gear(this.jump);
-            this.claimed = true;
-            
-            if (this.jump == "none"){
-                player.gear_count ++;
-            }
-        }
-    }
-}
 
 Generator.prototype = {
     draw:function() {
@@ -128,42 +194,6 @@ Door.prototype = {
         }
     }
      
-}
-
-Belt.prototype = {
-    check_coll:function(object) {
-        if (object.x > this.x && object.x < this.x + this.width && object.y + BLOCK_SIZE / 2 >= this.y && object.y + BLOCK_SIZE / 2 < this.y + BLOCK_SIZE){
-            object.falling = false;
-            object.y = this.y - BLOCK_SIZE / 2;
-            
-            if (!this.auto_on && !this.powered){return;}
-            
-            if (this.direction == "left") {
-                object.x -= this.speed;
-            }
-            if (this.direction == "right") {
-                object.x += this.speed;
-            }
-        }
-    },
-    
-    draw:function() {
-        canvas.fillStyle = "rgb(0, 0, 0)";
-        canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE / 2);
-        
-        canvas.fillStyle = silver(7);
-        canvas.beginPath();
-        canvas.arc(this.x, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
-        canvas.fill();
-        
-        canvas.beginPath();
-        canvas.arc(this.x + this.width, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
-        canvas.fill();
-    },
-    
-    update:function() {
-        this.check_coll(player);
-    }
 }
 
 Tram.prototype = {

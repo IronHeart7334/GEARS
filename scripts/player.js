@@ -191,7 +191,7 @@ Player.prototype = {
     
     show_gear:function() {
         if (this.gears[this.current_gear] == "none"){return};
-        draw_gear(canvas_size * 0.025, canvas_size * 0.925, 10, this.gears[this.current_gear].color, false);  
+        drawGear(0, canvas_size * 0.9, canvas_size * 0.1, this.gears[this.current_gear].color, false);  
     },
     
     drawHUD:function() {

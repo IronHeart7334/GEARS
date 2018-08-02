@@ -113,6 +113,9 @@ Area.prototype = {
         for(var block of this.blocks){
             block.checkColl(entity);
         }
+        for(var machine of this.machines){
+            machine.checkForCollide(entity);
+        }
     },
     
     draw : function(){
