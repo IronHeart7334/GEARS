@@ -106,7 +106,74 @@ Belt.prototype.update = function(){
 
 function Tram(x, y, destinations, autoOn){
     Machine.call(this, x, y);
+    this.destinations = [];
+    var t = this;
+    destinations.forEach(function(coords){t.destinations.push([coords[0] * BLOCK_SIZE, coords[1] * BLOCK_SIZE])});
+    this.destNum = 0;
+    this.ready = true;
+    this.moving = false;
+    this.autoOn = autoOn;
+    this.carrying = null;
+}
+extend(Tram, Machine);
+Tram.prototype.draw = function(){
+    canvas.fillStyle = silver(7);
+    canvas.fillRect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
+    canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
     
+    if (this.autoOn || this.powered){
+        canvas.fillStyle = energy_color;
+        canvas.fillRect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
+    }
+}
+Tram.prototype.collide = function(entity){
+    if(this.carrying === null && entity.magnetic){
+        this.carrying = entity;
+        this.moving = true;
+    }
+}
+Tram.prototype.checkForCollide = function(entity){
+    Machine.prototype.checkForCollide.call(this, entity);
+    
+    if(entity.magnetic && !this.moving && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
+        entity.moveY(-GRAVITY * 2);
+    }
+}
+Tram.prototype.followPath = function(){
+    if(this.destinations.length > 0){
+        current = this.destinations[this.destNum];
+        var speed = blocksPerSecond(1);
+        if (this.x > current[0]){
+            this.x -= speed;
+        } else if (this.x < current[0]){
+            this.x += speed;
+        }
+    
+        if (this.y > current[1]){
+            this.y -= speed;
+        } else if (this.y < current[1]){
+            this.y += speed;
+        }
+    
+        //todo: add checking if closest possible coords
+        if (this.x === current[0] && this.y === current[1]){
+            this.dest_num++;
+            if (this.dest_num + 1 === this.destinations.length){
+                this.ready = false;
+            }
+            if (this.dest_num === this.destinations.length){
+                this.dest_num = 0;
+                this.ready = true;
+                this.moving = false;
+            }
+        }
+    }
+}
+Tram.prototype.update = function(){
+    if(this.moving){
+        this.followPath();
+        this.powered = true; //otherwise, will stop immediately upon moving
+    }
 }
 
 // Machine Classes
@@ -120,20 +187,6 @@ function Door(x, y) {
     this.x = x * BLOCK_SIZE;
     this.y = y * BLOCK_SIZE;
     this.powered = false;
-}
-
-function Tram(x, y, destinations, auto_on){
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
-    this.auto_on = auto_on;
-    this.destinations = [];
-    for (dest of destinations){
-        this.destinations.push([dest[0] * BLOCK_SIZE, dest[1] * BLOCK_SIZE]);
-    }
-    this.destinations.push([this.x, this.y]);
-    this.dest_num = 0;
-    this.ready = true;
-    this.moving = false;
 }
 
 // not finished
@@ -196,18 +249,8 @@ Door.prototype = {
      
 }
 
+/*
 Tram.prototype = {
-    draw:function(){
-        canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
-        canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
-        
-        if (!this.auto_on && !this.powered){return;}
-        
-        canvas.fillStyle = energy_color;
-        canvas.fillRect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
-    },
-    
     update:function(){
         if (this.moving){
             this.follow_path();
@@ -227,35 +270,7 @@ Tram.prototype = {
             this.moving = true;
         }
     },
-    
-    follow_path:function(){
-        this.current_dest = this.destinations[this.dest_num];
-        
-        if (this.x > this.current_dest[0]){
-            this.x -= 5;
-        }
-         if (this.x < this.current_dest[0]){
-            this.x += 5;
-        }
-        if (this.y > this.current_dest[1]){
-            this.y -= 5;
-        }
-        if (this.y < this.current_dest[1]){
-            this.y += 5;
-        }
-        else if (this.x == this.current_dest[0] && this.y == this.current_dest[1]){
-            this.dest_num ++;
-            if (this.dest_num + 1 == this.destinations.length){
-                this.ready = false;
-            }
-            if (this.dest_num == this.destinations.length){
-                this.dest_num = 0;
-                this.ready = true;
-                this.moving = false;
-            }
-        }
-    }
-}
+    */
 
 // not finished
 Train.prototype = {

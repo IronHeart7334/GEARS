@@ -53,6 +53,7 @@ Block.prototype = {
             this.x + BLOCK_SIZE + 1,
             this.y + BLOCK_SIZE * 1.5
         )){
+            console.log("clunk");
             entity.y = this.y + BLOCK_SIZE * 1.5;
         } 
     },
@@ -77,10 +78,10 @@ Block.prototype = {
         }
     },
     checkColl(entity){
+        this.bottomColl(entity);
         this.leftColl(entity);
         this.rightColl(entity);
         this.topColl(entity);
-        this.bottomColl(entity);
     }	
 }
 
