@@ -82,6 +82,8 @@ Area.prototype = {
         
         this.height = map.length * BLOCK_SIZE;
         this.width = longestRow * BLOCK_SIZE;
+        
+        this.machines.forEach(function(machine){machine.init()});
     },
     
     //energy functions have to do with machines
@@ -96,12 +98,13 @@ Area.prototype = {
             }
         }
         for(machine of this.machines){
+            /*
             if(this.energy.some(within(machine))){
                 machine.powered = true;
             } else {
                 machine.powered = false;
-            }
-            machine.update();
+            }*/
+            machine.checkIfUpdate();
         }
     },
     //not implemented yet

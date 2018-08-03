@@ -4,12 +4,12 @@
         <title> GEARS </title>
         <meta name="Creator" content="Matt Crow">
         <script src="scripts/utilities.js"></script>
+        <script src="scripts/entity.js"></script>
         <script src="scripts/level.js"></script>
         <script src="scripts/block.js"></script>
         <script src="scripts/jump.js"></script>
         <script src="scripts/machines.js"></script>
         <script src="scripts/player.js"></script>
-        <script src="scripts/entity.js"></script>
         <style>
             div {
                 border-style: groove;
@@ -80,8 +80,8 @@
         		}
         		
         		// right
-        		if (x_shift < canvas_size - current_level.longest_row * BLOCK_SIZE) {
-        			x_shift = canvas_size - current_level.longest_row * BLOCK_SIZE;
+        		if (x_shift < canvas_size - current_level.areas[current_level.currentArea].width) {
+        			x_shift = canvas_size - current_level.areas[current_level.currentArea].width;
         		}
         		
         		// top
@@ -90,8 +90,8 @@
         		}
         		
         		// bottom
-        		if (y_shift < canvas_size - current_level.height * BLOCK_SIZE){
-        			y_shift = canvas_size - current_level.height * BLOCK_SIZE;
+        		if (y_shift < canvas_size - current_level.areas[current_level.currentArea].height){
+        			y_shift = canvas_size - current_level.areas[current_level.currentArea].height;
         		}
         		
         		canvas.translate(x_shift, y_shift);
@@ -290,7 +290,7 @@
                     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
                 ],
                 [
-                    new Tram(1, -1, [], true),
+                    new Tram(1, -1, [], false),
                     new Tram(10, 1, [[17, 1]], true),
                     new Tram(10, 12, [], true),
                     new Tram(11, 12, [], true),
@@ -300,8 +300,8 @@
                     new Tram(15, 12, [], true),
                     new Tram(16, 12, [], true),
                     new Tram(18, 4, [[9, 4]], true),
-                    new Belt(3, 6, 3, "right", 5, true),
-                    new Belt(4, 9, 3, "left", 5, true)
+                    new Belt(3, 6, 3, true, true),
+                    new Belt(4, 9, 3, false, true)
                 ],
                 [0, 2],
                 [19, 2]
@@ -317,7 +317,7 @@
                     [1, 1, 1, 1, 1, 1, 1, 1, 2, 0]
                 ],
                 [
-                    new Door(9, 3)
+                    //new Door(9, 3)
                 ],
                 [0, 3],
                 [8, 3]

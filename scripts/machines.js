@@ -1,10 +1,19 @@
 // abstract base class for machines
 // todo: add power methods
-function Machine(x, y){
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
+function Machine(x, y, autoOn){
+    this.startX = x * BLOCK_SIZE;
+    this.startY = y * BLOCK_SIZE;
+    this.autoOn = autoOn;
 }
 Machine.prototype = {
+    init : function(){
+        this.x = this.startX;
+        this.y = this.startY;
+        this.powered = false;
+    },
+    isEnabled : function(){
+        return this.powered || this.autoOn;
+    },
     draw : function(){
         var obj = this;
         throw new Error("No draw method found for " + obj);
@@ -21,13 +30,17 @@ Machine.prototype = {
         return collide;
     },
     update : function(){
-        var obj = this;
-        throw new Error("No update method found for " + obj);
+        //defined by subclasses
+    },
+    checkIfUpdate : function(){
+        if(this.isEnabled()){
+            this.update();
+        }
     }
 }
 
 function Gear(x, y, jump){
-    Machine.call(this, x, y);
+    Machine.call(this, x, y, true);
     this.jump = jump;
     this.claimed = false;
     this.rotated = false;
@@ -61,10 +74,9 @@ Gear.prototype.update = function(){
 
 
 function Belt(x, y, width, movesRight, autoOn){
-    Machine.call(this, x, y);
+    Machine.call(this, x, y, autoOn);
     this.width = width * BLOCK_SIZE;
     this.movesRight = movesRight;
-    this.autoOn = autoOn;
 }
 extend(Belt, Machine);
 Belt.prototype.checkForCollide = function(entity){
@@ -105,14 +117,13 @@ Belt.prototype.update = function(){
 
 
 function Tram(x, y, destinations, autoOn){
-    Machine.call(this, x, y);
+    Machine.call(this, x, y, autoOn);
     this.destinations = [];
     var t = this;
     destinations.forEach(function(coords){t.destinations.push([coords[0] * BLOCK_SIZE, coords[1] * BLOCK_SIZE])});
     this.destNum = 0;
     this.ready = true;
     this.moving = false;
-    this.autoOn = autoOn;
     this.carrying = null;
 }
 extend(Tram, Machine);
@@ -135,7 +146,7 @@ Tram.prototype.collide = function(entity){
 Tram.prototype.checkForCollide = function(entity){
     Machine.prototype.checkForCollide.call(this, entity);
     
-    if(entity.magnetic && !this.moving && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
+    if(entity.magnetic && !this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
         entity.moveY(-GRAVITY * 2);
     }
 }
@@ -175,6 +186,20 @@ Tram.prototype.update = function(){
         this.powered = true; //otherwise, will stop immediately upon moving
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Machine Classes
 

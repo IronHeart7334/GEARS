@@ -136,43 +136,9 @@ Player.prototype = {
             this.moveX((BLOCK_SIZE / FPS) * this.speed * this.facingMod);
         }
         this.falling = true;
-        if(this.y >= current_level.height_in_px){
+        if(this.y >= current_level.areas[current_level.currentArea].height){
             this.respawn();
         }
-    },
-    
-    draw_torso:function() {
-        var torso_size = BLOCK_SIZE * 0.5;
-        canvas.fillStyle = silver(5);
-        if (this.facingMod === -1){
-            canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
-        } else {
-            canvas.fillRect(this.x - BLOCK_SIZE / 2, this.y - torso_size / 2, torso_size, torso_size);
-        }
-        
-    },
-    
-    draw_treads:function(){
-        var tread_shift = 20;
-        var treadY = this.y + tread_shift;
-        var tread_width = BLOCK_SIZE;
-        
-        canvas.fillStyle = "rgb(0, 0, 0)";
-        canvas.beginPath();
-        canvas.moveTo(this.x, treadY);
-        canvas.lineTo(this.x - tread_width / 2, this.y + BLOCK_SIZE / 2);
-        canvas.lineTo(this.x + tread_width / 2, this.y + BLOCK_SIZE / 2);
-        canvas.fill();
-    },
-    
-    draw_arms:function(){
-        canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + this.arm_shift, this.y, (BLOCK_SIZE / 3) * this.facingMod, BLOCK_SIZE / 5);
-    },
-    
-    draw_head:function(){
-        canvas.fillStyle = silver(6);
-        canvas.fillRect(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 2, BLOCK_SIZE / 4);
     },
     
     draw_hitbox:function(){
@@ -183,10 +149,34 @@ Player.prototype = {
     draw:function() {
         //this.draw_hitbox();
         
-        this.draw_torso();
-        this.draw_treads();
-        this.draw_arms();
-        this.draw_head();
+        // torso
+        var torso_size = BLOCK_SIZE * 0.5;
+        canvas.fillStyle = silver(5);
+        if (this.facingMod === -1){
+            canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
+        } else {
+            canvas.fillRect(this.x - BLOCK_SIZE / 2, this.y - torso_size / 2, torso_size, torso_size);
+        }
+        
+        // treads
+        var tread_shift = 20;
+        var treadY = this.y + tread_shift;
+        var tread_width = BLOCK_SIZE;
+        
+        canvas.fillStyle = "rgb(0, 0, 0)";
+        canvas.beginPath();
+        canvas.moveTo(this.x, treadY);
+        canvas.lineTo(this.x - tread_width / 2, this.y + BLOCK_SIZE / 2);
+        canvas.lineTo(this.x + tread_width / 2, this.y + BLOCK_SIZE / 2);
+        canvas.fill();
+        
+        // arms
+        canvas.fillStyle = silver(7);
+        canvas.fillRect(this.x + this.arm_shift, this.y, (BLOCK_SIZE / 3) * this.facingMod, BLOCK_SIZE / 5);
+        
+        // head
+        canvas.fillStyle = silver(6);
+        canvas.fillRect(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 2, BLOCK_SIZE / 4);
     },
     
     show_gear:function() {
