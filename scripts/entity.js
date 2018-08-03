@@ -5,6 +5,7 @@ function Entity(){
     this.width = BLOCK_SIZE;
     this.height = BLOCK_SIZE;
 }
+
 Entity.prototype = {
     setX : function(x){
         this.x = x;
@@ -26,12 +27,30 @@ Entity.prototype = {
         this.moveX(x);
         this.moveY(y);
     },
+    setWidth : function(w){
+        this.width = w;
+    },
+    setHeight : function(h){
+        this.height = h;
+    },
     checkForCollide : function(entity){
         return (
             this.x + this.width >= entity.x &&
             this.x <= entity.x + entity.width &&
             this.y + this.height >= entity.y &&
             this.y <= entity.y + entity.height
+        );
+    },
+    isWithin : function(x1, y1, x2, y2){
+        /*
+        x1, y1: upper left corner
+        x2, y2: lower right
+        */
+        return (
+            (this.x + this.width >= x1) &&
+            (this.y >= y1) &&
+            (this.x <= x2) &&
+            (this.y + this.height <= y2)
         );
     }
 }

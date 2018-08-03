@@ -38,7 +38,7 @@ Block.prototype = {
             ){
                 ret = true;
                 entity.falling = false; //TODO: individual collisions reactions per entity
-                entity.y = this.y - BLOCK_SIZE / 2;
+                entity.y = this.y - entity.height;
             }
         } else {
             console.log("no top collide b/c left or right");
@@ -54,7 +54,7 @@ Block.prototype = {
             this.y + BLOCK_SIZE * 1.5
         )){
             console.log("clunk");
-            entity.y = this.y + BLOCK_SIZE * 1.5;
+            entity.y = this.y + entity.height;
         } 
     },
     leftColl:function(entity) {
@@ -64,7 +64,7 @@ Block.prototype = {
             this.x + BLOCK_SIZE / 2,
             this.y + BLOCK_SIZE
         )){
-            entity.x = this.x - BLOCK_SIZE / 2;
+            entity.x = this.x - entity.width;
         }
     },
     rightColl:function(entity) {
@@ -74,7 +74,7 @@ Block.prototype = {
             this.x + BLOCK_SIZE,
             this.y + BLOCK_SIZE
         )){
-            entity.x = this.x + BLOCK_SIZE * 1.5;
+            entity.x = this.x + entity.width;
         }
     },
     checkColl(entity){
@@ -83,7 +83,7 @@ Block.prototype = {
         this.rightColl(entity);
         this.topColl(entity);
     }	
-}
+};
 
 
 // subclasses

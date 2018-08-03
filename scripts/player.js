@@ -1,4 +1,5 @@
 function Player() {
+    Entity.call(this);
     this.facingMod = 1; // 1: right, -1: left
     this.x = 0;
     this.y = 0;
@@ -15,6 +16,7 @@ function Player() {
     
     this.speed = blocksPerSecond(2);
 }
+
 Player.prototype = {
     init : function(x, y){
         this.load(x, y);
@@ -25,27 +27,14 @@ Player.prototype = {
         this.timeInJump = 0;
         this.jumpX = 0;
         this.jumpY = 0;
-        
+
         this.gears = ["none"];
         this.current_gear = 0;
         this.gear_count = 0;
     },
-    
     load : function(x, y){
-        this.x = x;
-        this.y = y;
+        this.setCoords(x, y);
         this.spawn_coords = [x, y];
-    },
-    
-    move : function(x, y){
-        this.x += x;
-        this.y += y;
-    },
-    moveX : function(x) {
-        this.x += x;
-    },
-    moveY : function(y) {
-        this.y += y;
     },
     respawn:function() {
         this.x = this.spawn_coords[0];
@@ -72,19 +61,6 @@ Player.prototype = {
     stop : function(){
         this.moving = false;
     },
-    isWithin : function(x1, y1, x2, y2){
-        /*
-        x1, y1: upper left corner
-        x2, y2: lower right
-        */
-        return (
-            (this.x + BLOCK_SIZE / 2 >= x1) &&
-            (this.y - BLOCK_SIZE / 2 >= y1) &&
-            (this.x - BLOCK_SIZE / 2 <= x2) &&
-            (this.y + BLOCK_SIZE / 2 <= y2)
-        );
-    },
-    
     obtain_gear:function(gear) {
         var found = false;
         for (g of this.gears){
@@ -143,11 +119,11 @@ Player.prototype = {
     
     draw_hitbox:function(){
         canvas.fillStyle = "rgb(255, 255, 255)";
-        canvas.fillRect(this.x - BLOCK_SIZE / 2, this.y - BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE);
+        canvas.fillRect(this.x, this.y, this.width, this.height);
     },
     
     draw:function() {
-        //this.draw_hitbox();
+        this.draw_hitbox();
         
         // torso
         var torso_size = BLOCK_SIZE * 0.5;
@@ -192,3 +168,5 @@ Player.prototype = {
         this.arm_shift = 0;
     }	
 }
+
+extend(Player, Entity);

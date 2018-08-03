@@ -53,8 +53,8 @@ function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
     this.blockMap = blockMap;
     this.machines = machines;
     // + 0.5 is for a half-block offset
-    this.leftSpawn = [(leftSpawn[0] + 0.5) * BLOCK_SIZE, (leftSpawn[1] + 0.5) * BLOCK_SIZE];
-    this.rightSpawn = [(rightSpawn[0] + 0.5) * BLOCK_SIZE, (rightSpawn[1] + 0.5) * BLOCK_SIZE];
+    this.leftSpawn = [leftSpawn[0] * BLOCK_SIZE, leftSpawn[1] * BLOCK_SIZE];
+    this.rightSpawn = [rightSpawn[0] * BLOCK_SIZE, rightSpawn[1] * BLOCK_SIZE];
 }
 Area.prototype = {
     loadMap : function(){
