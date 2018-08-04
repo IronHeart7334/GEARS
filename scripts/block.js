@@ -89,20 +89,31 @@ Block.prototype = {
     shoveOut : function(entity){
         var xDiff = (entity.x + entity.width / 2) - (this.x + this.width / 2);
         var yDiff = (entity.y + entity.height / 2) - (this.y + this.height / 2);
-        var tanTheta = yDiff / xDiff;
+        if(xDiff === 0){
+            xDiff === yDiff; // prevent undefined
+        }
+        var tanTheta = -yDiff / xDiff;
         var angle = Math.atan(tanTheta);
-        var degrees = (180 * angle / Math.PI) - 180;
+        var degrees = 180 * angle / Math.PI;
         while(degrees < 0){
             degrees += 360;
         }
         //console.log(degrees);
-        if(between(45, degrees, 135)){
+        if((xDiff === 0 && yDiff > 0) || between(45, degrees, 135)){
             //top
             entity.setY(this.y - entity.height);
             entity.falling = false;
-        } else if(between(135, degrees, 225)){
+        } else if((yDiff === 0 && xDiff < 0) || between(135, degrees, 225)){
             //left
             entity.setX(this.x - entity.width);
+        } else if((yDiff === 0 && xDiff > 0) || (between(1, degrees, 45) || between(315, degrees, 360))){
+            //right
+            entity.setX(this.x + this.width);
+        } else if((xDiff === 0 && yDiff < 0) || between(225, degrees, 315)){
+            //bottom
+            entity.setY(this.y + this.height);
+        } else {
+            console.log("? " + tanTheta);
         }
         /*
         var shoveX = Math.cos(angle);
