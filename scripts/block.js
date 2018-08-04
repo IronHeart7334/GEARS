@@ -87,34 +87,59 @@ Block.prototype = {
         return ret;
     },
     shoveOut : function(entity){
+        // yay! finally works!
+        // 
+        // the end coordinates of a line between this and entity, but shifted to (0, 0)
         var xDiff = (entity.x + entity.width / 2) - (this.x + this.width / 2);
         var yDiff = (entity.y + entity.height / 2) - (this.y + this.height / 2);
+        
+        // the length of the sides of the triangle
+        var x = Math.abs(xDiff);
+        var y = Math.abs(yDiff);
+        
+        var alpha;
+        
+        if(x === 0){
+            //prevent undefined
+            alpha = 90; 
+        } else {
+            alpha = Math.atan(y / x) * 180 / Math.PI;
+        }
+        
+        var theta;
+        //since I'm not performing trig after this, these are their angles on the canvas, NOT CARTESIAN
+        if(xDiff > 0 && yDiff < 0){
+            theta = alpha;
+        } else if(xDiff < 0 && yDiff < 0){
+            theta = 180 - alpha;
+        } else if(xDiff < 0 && yDiff > 0){
+            theta = 180 + alpha;
+        } else {
+            theta = 360 - alpha;
+        }
+        
         if(xDiff === 0){
-            xDiff === yDiff; // prevent undefined
+            theta = (yDiff > 0) ? 270 : 90;
         }
-        var tanTheta = -yDiff / xDiff;
-        var angle = Math.atan(tanTheta);
-        var degrees = 180 * angle / Math.PI;
-        while(degrees < 0){
-            degrees += 360;
+        if(yDiff === 0){
+            theta = (xDiff > 0) ? 0 : 180;
         }
-        console.log(degrees);
-        if((xDiff === 0 && yDiff > 0) || between(45, degrees, 135)){
+        
+        if(between(45, theta, 135)){
             //top
             entity.setY(this.y - entity.height);
             entity.falling = false;
-        } else if((yDiff === 0 && xDiff < 0) || between(135, degrees, 225)){
+        } else if(between(135, theta, 225)){
             //left
             entity.setX(this.x - entity.width);
-        } else if((yDiff === 0 && xDiff > 0) || (between(1, degrees, 45) || between(315, degrees, 360))){
+        } else if((between(0, theta, 45) || between(315, theta, 360))){
             //right
-            //console.log("right when angle = " + degrees);
             entity.setX(this.x + this.width);
-        } else if((xDiff === 0 && yDiff < 0) || between(225, degrees, 315)){
+        } else if(between(225, theta, 315)){
             //bottom
             entity.setY(this.y + this.height);
         } else {
-            console.log("? " + tanTheta);
+            console.log("? " + theta);
         }
     },
     checkColl(entity){
@@ -174,11 +199,12 @@ function testShove(){
     var left = [];
     var right = [];
     
-    for(var i = 0; i < 360; i++){
-        //console.log(e.x + ", " + e.y);
+    console.log(b.x + ", " + b.y);
+    for(var i = 0; i <= 360; i+=15){
         console.log(i + ":");
         var angle = Math.PI * i / 180;
         e.setCoords(Math.cos(angle), -Math.sin(angle));
+        console.log(e.x + ", " + e.y);
         b.checkColl(e);
         if(e.y === b.y - b.height){
             top.push(i);
