@@ -23,3 +23,7 @@ function max(array){
     array.forEach(isMax);
     return ret;
 }
+
+function between(min, val, max){
+    return min <= val && val <= max;
+}

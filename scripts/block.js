@@ -87,33 +87,47 @@ Block.prototype = {
         return ret;
     },
     shoveOut : function(entity){
-        var xDiff = this.x - entity.x;
-        var yDiff = this.y - entity.y;
+        var xDiff = (entity.x + entity.width / 2) - (this.x + this.width / 2);
+        var yDiff = (entity.y + entity.height / 2) - (this.y + this.height / 2);
         var tanTheta = yDiff / xDiff;
         var angle = Math.atan(tanTheta);
+        var degrees = (180 * angle / Math.PI) - 180;
+        while(degrees < 0){
+            degrees += 360;
+        }
+        //console.log(degrees);
+        if(between(45, degrees, 135)){
+            //top
+            entity.setY(this.y - entity.height);
+            entity.falling = false;
+        } else if(between(135, degrees, 225)){
+            //left
+            entity.setX(this.x - entity.width);
+        }
+        /*
         var shoveX = Math.cos(angle);
         var shoveY = Math.sin(angle);
         
         while(this.checkForCollide(entity)){
             entity.move(shoveX, shoveY);
-        }
+        }*/
     },
     checkColl(entity){
         var ret = false;
         // since js short circuit evaluates, only 1 collision reaction will happen
         //nope. still not working. Need general "on collide" that checks for top, bottom, etc.
+        /*
         if(this.topColl(entity) || this.bottomColl(entity) || this.leftColl(entity) || this.rightColl(entity)){
             ret = true;
-        }
+        }*/
         
         
         
        
        //this doesn't work. Block rodeo
-       /*
        if(this.checkForCollide(entity)){
            this.shoveOut(entity);
-       }*/
+       }
         return ret;
     }	
 };
