@@ -98,7 +98,7 @@ Block.prototype = {
         while(degrees < 0){
             degrees += 360;
         }
-        //console.log(degrees);
+        console.log(degrees);
         if((xDiff === 0 && yDiff > 0) || between(45, degrees, 135)){
             //top
             entity.setY(this.y - entity.height);
@@ -108,6 +108,7 @@ Block.prototype = {
             entity.setX(this.x - entity.width);
         } else if((yDiff === 0 && xDiff > 0) || (between(1, degrees, 45) || between(315, degrees, 360))){
             //right
+            //console.log("right when angle = " + degrees);
             entity.setX(this.x + this.width);
         } else if((xDiff === 0 && yDiff < 0) || between(225, degrees, 315)){
             //bottom
@@ -115,13 +116,6 @@ Block.prototype = {
         } else {
             console.log("? " + tanTheta);
         }
-        /*
-        var shoveX = Math.cos(angle);
-        var shoveY = Math.sin(angle);
-        
-        while(this.checkForCollide(entity)){
-            entity.move(shoveX, shoveY);
-        }*/
     },
     checkColl(entity){
         var ret = false;
@@ -131,11 +125,6 @@ Block.prototype = {
         if(this.topColl(entity) || this.bottomColl(entity) || this.leftColl(entity) || this.rightColl(entity)){
             ret = true;
         }*/
-        
-        
-        
-       
-       //this doesn't work. Block rodeo
        if(this.checkForCollide(entity)){
            this.shoveOut(entity);
        }
@@ -174,4 +163,35 @@ function testAllSilver(){
 }
 function testAllGold(){
     testAllColorFunction(gold);
+}
+
+function testShove(){
+    var b = new GoldBlock(0, 0);
+    var e = new Entity();
+    
+    var top = [];
+    var bottom = [];
+    var left = [];
+    var right = [];
+    
+    for(var i = 0; i < 360; i++){
+        //console.log(e.x + ", " + e.y);
+        console.log(i + ":");
+        var angle = Math.PI * i / 180;
+        e.setCoords(Math.cos(angle), -Math.sin(angle));
+        b.checkColl(e);
+        if(e.y === b.y - b.height){
+            top.push(i);
+        } else if(e.y === b.y + b.height){
+            bottom.push(i);
+        } else if(e.x === b.x - e.width){
+            left.push(i);
+        } else if(e.x === b.x + b.width){
+            right.push(i);
+        }
+    }
+    console.log("Top: " + top);
+    console.log("Bottom: " + bottom);
+    console.log("Left: " + left);
+    console.log("Right: " + right);
 }
