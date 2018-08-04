@@ -9,10 +9,10 @@ function Block(baseColor, rimColor, x, y) {
     x: the number of blocks between this one and the leftmost side of the area it is in
     y: the number of blocks above this one and the top of the area it is in
     */
+    Entity.call(this);
+    this.setCoords(x * BLOCK_SIZE, y * BLOCK_SIZE);
     this.baseColor = baseColor;
     this.rimColor = rimColor;
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
 }
 Block.prototype = {
     draw:function(){
@@ -32,7 +32,7 @@ Block.prototype = {
             if(entity.isWithin(
                 this.x + BLOCK_SIZE * 0.25,
                 this.y - BLOCK_SIZE,
-                this.x + BLOCK_SIZE / 2,
+                this.x + BLOCK_SIZE * 0.75,
                 this.y + BLOCK_SIZE / 2
                 )
             ){
@@ -47,17 +47,21 @@ Block.prototype = {
     },
     //buggy
     bottomColl:function(entity){
+        var ret = false;
         if(entity.isWithin(
             this.x - 1,
             this.y + BLOCK_SIZE / 2,
             this.x + BLOCK_SIZE + 1,
-            this.y + BLOCK_SIZE * 1.5
+            this.y + this.height
         )){
             console.log("clunk");
-            entity.y = this.y + entity.height;
-        } 
+            entity.y = this.y + this.height;
+            ret = true;
+        }
+        return ret;
     },
     leftColl:function(entity) {
+        var ret = false;
         if(entity.isWithin(
             this.x,
             this.y,
@@ -65,9 +69,12 @@ Block.prototype = {
             this.y + BLOCK_SIZE
         )){
             entity.x = this.x - entity.width;
+            ret = true;
         }
+        return ret;
     },
     rightColl:function(entity) {
+        var ret = false;
         if(entity.isWithin(
             this.x + BLOCK_SIZE / 2,
             this.y,
@@ -75,15 +82,42 @@ Block.prototype = {
             this.y + BLOCK_SIZE
         )){
             entity.x = this.x + entity.width;
+            ret = true;
+        }
+        return ret;
+    },
+    shoveOut : function(entity){
+        var xDiff = this.x - entity.x;
+        var yDiff = this.y - entity.y;
+        var tanTheta = yDiff / xDiff;
+        var angle = Math.atan(tanTheta);
+        var shoveX = Math.cos(angle);
+        var shoveY = Math.sin(angle);
+        
+        while(this.checkForCollide(entity)){
+            entity.move(shoveX, shoveY);
         }
     },
     checkColl(entity){
-        this.bottomColl(entity);
-        this.leftColl(entity);
-        this.rightColl(entity);
-        this.topColl(entity);
+        var ret = false;
+        // since js short circuit evaluates, only 1 collision reaction will happen
+        //nope. still not working. Need general "on collide" that checks for top, bottom, etc.
+        if(this.topColl(entity) || this.bottomColl(entity) || this.leftColl(entity) || this.rightColl(entity)){
+            ret = true;
+        }
+        
+        
+        
+       
+       //this doesn't work. Block rodeo
+       /*
+       if(this.checkForCollide(entity)){
+           this.shoveOut(entity);
+       }*/
+        return ret;
     }	
 };
+extend(Block, Entity);
 
 
 // subclasses

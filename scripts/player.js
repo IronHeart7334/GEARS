@@ -1,10 +1,7 @@
 function Player() {
     Entity.call(this);
     this.facingMod = 1; // 1: right, -1: left
-    this.x = 0;
-    this.y = 0;
     this.moving = false; // moving left or right
-    this.arm_shift = 0;
     
     this.falling = true;
     this.jumping = false;
@@ -90,8 +87,8 @@ Player.prototype = {
     },
     updateJump : function(){
         var jumpTime = FPS / 2; //time it takes to finish jump
-        this.x += this.jumpX * this.facingMod / jumpTime;
-        this.y -= this.jumpY / jumpTime;
+        this.moveX(this.jumpX * this.facingMod / jumpTime);
+        this.moveY(-this.jumpY / jumpTime);
         this.timeInJump++;
         if(this.timeInJump >= jumpTime){
             this.timeInJump = 0;
@@ -148,7 +145,7 @@ Player.prototype = {
         
         // arms
         canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + this.arm_shift, this.y, (BLOCK_SIZE / 3) * this.facingMod, BLOCK_SIZE / 5);
+        canvas.fillRect(this.x, this.y, (BLOCK_SIZE / 3) * this.facingMod, BLOCK_SIZE / 5);
         
         // head
         canvas.fillStyle = silver(6);
@@ -162,11 +159,7 @@ Player.prototype = {
     
     drawHUD:function() {
         this.show_gear();
-    },
-    
-    reset_arm:function() {
-        this.arm_shift = 0;
-    }	
-}
+    }
+};
 
 extend(Player, Entity);

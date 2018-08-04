@@ -48,12 +48,12 @@ Entity.prototype = {
         */
         return (
             (this.x + this.width >= x1) &&
-            (this.y >= y1) &&
+            (this.y + this.height >= y1) &&
             (this.x <= x2) &&
-            (this.y + this.height <= y2)
+            (this.y <= y2)
         );
     }
-}
+};
 
 //works
 function testCollide(){
