@@ -1,17 +1,21 @@
+/*
+ * The Player class is used to construct the player object initialized by the HTML page
+ */
 function Player() {
     Entity.call(this);
+    this.setWidth(BLOCK_SIZE * 0.9);
+    this.setHeight(BLOCK_SIZE * 0.9);
     this.facingMod = 1; // 1: right, -1: left
     this.moving = false; // moving left or right
     
-    this.falling = true;
-    this.jumping = false;
-    this.timeInJump = 0;
-    this.jumpX = 0;
-    this.jumpY = 0;
+    this.falling = true; // used to determine if this is allowed to move left or right
     
-    this.magnetic = true;
+    this.jumping = false; // if this Player is in the middle of jumping
+    this.timeInJump = 0; // number of frames it has been jumping for
+    this.jumpX = 0; // total x distance that will be traveled when this finishes jumping
+    this.jumpY = 0; // total y
     
-    this.speed = blocksPerSecond(2);
+    this.speed = blocksPerSecond(3);
 }
 
 Player.prototype = {
@@ -25,17 +29,16 @@ Player.prototype = {
         this.jumpX = 0;
         this.jumpY = 0;
 
-        this.gears = ["none"];
-        this.current_gear = 0;
-        this.gear_count = 0;
+        this.gears = [];
+        this.currentGearIndex = -1;
     },
     load : function(x, y){
-        this.setCoords(x, y);
-        this.spawn_coords = [x, y];
+        this.setCoords(x, y); //defined by Entity
+        this.spawnCoords = [x, y];
     },
     respawn:function() {
-        this.x = this.spawn_coords[0];
-        this.y = this.spawn_coords[1];
+        //invoked upon going below the map
+        this.setCoords(this.spawnCoords[0], this.spawnCoords[1]);
         this.jumpX = 0;
         this.jumpY = 0;
     },
@@ -58,32 +61,33 @@ Player.prototype = {
     stop : function(){
         this.moving = false;
     },
-    obtain_gear:function(gear) {
-        var found = false;
-        for (g of this.gears){
-            if (g === gear) {
-                found = true;
-            }
-        }
-        if(!found){
-            this.gears.push(gear);
-        }
-        this.current_gear = this.gears.indexOf(gear);
+    obtainGear:function(gear) {
+        //TODO: maybe make it copy gear data?
+        this.gears.push(gear);
+        this.currentGearIndex = this.gears.indexOf(gear);
     },
     
     shiftGear:function() {
-        if (this.current_gear < this.gears.length - 1){
-            this.current_gear ++;
-        } else {this.current_gear = 0;}
+        // changes the currently selected gear
+        if(this.gears.length === 0){
+            console.log("Has no gears!");
+        } else if (this.currentGearIndex < this.gears.length - 1){
+            this.currentGearIndex ++;
+        } else {
+            this.currentGearIndex = 0;
+        }
     },
     
     jump : function() {
-        if (this.gears[this.current_gear] != "none" && !this.falling) {
+        //initiates a jump
+        if(this.gears.length === 0){
+            console.log("No gears");
+        } else if (!this.falling) {
             this.jumping = true;
             // the total amount moved after jumping
-            this.jumpX = this.gears[this.current_gear].xMom * BLOCK_SIZE;
-            this.jumpY = this.gears[this.current_gear].yMom * BLOCK_SIZE;
-        } else {console.log("no gear");}
+            this.jumpX = this.gears[this.currentGearIndex].xMom * BLOCK_SIZE;
+            this.jumpY = this.gears[this.currentGearIndex].yMom * BLOCK_SIZE;
+        }
     },
     updateJump : function(){
         var jumpTime = FPS / 2; //time it takes to finish jump
@@ -98,6 +102,7 @@ Player.prototype = {
         }
     },
     
+    //TODO: do we want to be able to move while jumping?
     update:function() {
         if(this.falling){
             this.fall();
@@ -106,24 +111,25 @@ Player.prototype = {
             this.updateJump();
         } else if(this.moving && !this.falling){
             //no moving in midair
-            this.moveX((BLOCK_SIZE / FPS) * this.speed * this.facingMod);
+            this.moveX(this.speed * this.facingMod);
         }
         this.falling = true;
         if(this.y >= current_level.areas[current_level.currentArea].height){
+            //respawn if we fall off the map
             this.respawn();
         }
     },
     
-    draw_hitbox:function(){
+    drawHitbox:function(){
         canvas.fillStyle = "rgb(255, 255, 255)";
         canvas.fillRect(this.x, this.y, this.width, this.height);
     },
     
     draw:function() {
-        this.draw_hitbox();
+        this.drawHitbox();
         
         // torso
-        var torso_size = BLOCK_SIZE * 0.5;
+        var torso_size = this.width * 0.5;
         canvas.fillStyle = silver(5);
         if (this.facingMod === -1){
             canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
@@ -153,8 +159,9 @@ Player.prototype = {
     },
     
     show_gear:function() {
-        if (this.gears[this.current_gear] == "none"){return};
-        drawGear(0, canvas_size * 0.9, canvas_size * 0.1, this.gears[this.current_gear].color, false);  
+        if (this.gears.length > 0){
+            drawGear(0, canvas_size * 0.9, canvas_size * 0.1, this.gears[this.currentGearIndex].color, false);  
+        }
     },
     
     drawHUD:function() {

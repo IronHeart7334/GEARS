@@ -55,10 +55,13 @@ Gear.prototype.draw = function(){
 }
 Gear.prototype.collide = function(entity){
     try{
-        entity.obtain_gear(this.jump);
-        this.claimed = true;
+        if(!this.claimed){
+            entity.obtainGear(this.jump);
+            this.claimed = true;
+        }
     } catch(e){
         //not a Player
+        console.log(e.stack);
     }
 }
 Gear.prototype.update = function(){
@@ -138,7 +141,7 @@ Tram.prototype.draw = function(){
     }
 }
 Tram.prototype.collide = function(entity){
-    if(this.carrying === null && entity.magnetic){
+    if(this.carrying === null){
         this.carrying = entity;
         this.moving = true;
     }
@@ -146,7 +149,7 @@ Tram.prototype.collide = function(entity){
 Tram.prototype.checkForCollide = function(entity){
     Machine.prototype.checkForCollide.call(this, entity);
     
-    if(entity.magnetic && !this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
+    if(!this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
         entity.moveY(-GRAVITY * 2);
     }
 }
@@ -284,8 +287,6 @@ Tram.prototype = {
         if (!this.powered && !this.auto_on){return;}
         
         if (!this.ready){return;}
-        
-        if (!player.magnetic){return;}
         
         if (player.x >= this.x && player.x <= this.x + BLOCK_SIZE && player.y > this.y + BLOCK_SIZE * 1.5){
             player.y -= GRAVITY * 2;
