@@ -1,6 +1,7 @@
 // abstract base class for machines
 // todo: add power methods
 function Machine(x, y, autoOn){
+    Entity.call(this);
     this.startX = x * BLOCK_SIZE;
     this.startY = y * BLOCK_SIZE;
     this.autoOn = autoOn;
@@ -21,13 +22,10 @@ Machine.prototype = {
     collide : function(entity){
         //each subclass defines
     },
-    checkForCollide : function(entity){
-        var collide = false;
-        if(entity.isWithin(this.x, this.y, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
+    checkColl : function(entity){
+        if(this.checkForCollide(entity)){
             this.collide(entity);
-            collide = true;
         }
-        return collide;
     },
     update : function(){
         //defined by subclasses
@@ -37,7 +35,8 @@ Machine.prototype = {
             this.update();
         }
     }
-}
+};
+extend(Machine, Entity);
 
 function Gear(x, y, jump){
     Machine.call(this, x, y, true);
@@ -46,79 +45,70 @@ function Gear(x, y, jump){
     this.rotated = false;
     this.rotateCount = 0;
 }
-extend(Gear, Machine);
-//need to define each seperately to prevent overwriting entire prototype
-Gear.prototype.draw = function(){
-    if(!this.claimed){
-        drawGear(this.x, this.y, BLOCK_SIZE, this.jump.color, this.rotated);
-    }
-}
-Gear.prototype.collide = function(entity){
-    try{
-        if(!this.claimed){
-            entity.obtainGear(this.jump);
-            this.claimed = true;
-        }
-    } catch(e){
-        //not a Player
-        console.log(e.stack);
-    }
-}
-Gear.prototype.update = function(){
-    if(!this.claimed){
-        if(this.rotateCount === FPS){
-            this.rotated = !this.rotated;
-            this.rotateCount = 0;
-        }
-        this.rotateCount++;
-    }
-}
 
+Gear.prototype = {
+    draw : function(){
+        if(!this.claimed){
+            drawGear(this.x, this.y, BLOCK_SIZE * 0.9, this.jump.color, this.rotated);
+        }
+    },
+    collide : function(entity){
+        try{
+            if(!this.claimed){
+                entity.obtainGear(this.jump);
+                this.claimed = true;
+            }
+        } catch(e){
+            //not a Player
+            console.log(e.stack);
+        }
+    },
+    update : function(){
+        if(!this.claimed){
+            if(this.rotateCount === FPS){
+                this.rotated = !this.rotated;
+                this.rotateCount = 0;
+            }
+            this.rotateCount++;
+        }
+    }
+}
+extend(Gear, Machine);
 
 
 function Belt(x, y, width, movesRight, autoOn){
     Machine.call(this, x, y, autoOn);
-    this.width = width * BLOCK_SIZE;
+    this.setWidth(width * BLOCK_SIZE);
     this.movesRight = movesRight;
 }
+Belt.prototype = {
+    draw : function(){
+        canvas.fillStyle = "rgb(0, 0, 0)";
+        canvas.fillRect(this.x + BLOCK_SIZE / 2, this.y, this.width - BLOCK_SIZE / 2, this.height);
+        
+        canvas.fillStyle = silver(7);
+        canvas.beginPath();
+        canvas.arc(this.x + BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
+        canvas.fill();
+        
+        canvas.beginPath();
+        canvas.arc(this.x + this.width - BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
+        canvas.fill();
+    },
+    collide : function(entity){
+        var speed = blocksPerSecond(1);
+        entity.setY(this.y - entity.height);
+        entity.falling = false;
+        entity.moveX((this.movesRight) ? speed : -speed);
+    },
+    update : function(){
+        //do nothing
+    }
+};
 extend(Belt, Machine);
-Belt.prototype.checkForCollide = function(entity){
-    var collide = false;
-    if(entity.isWithin(this.x, this.y, this.x + this.width, this.y + BLOCK_SIZE)){
-        collide = true;
-        this.collide(entity);
-    }
-    return collide;
-}
-Belt.prototype.draw = function(){
-    canvas.fillStyle = "rgb(0, 0, 0)";
-    canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE / 2);
-
-    canvas.fillStyle = silver(7);
-    canvas.beginPath();
-    canvas.arc(this.x, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
-    canvas.fill();
-
-    canvas.beginPath();
-    canvas.arc(this.x + this.width, this.y + BLOCK_SIZE / 4, BLOCK_SIZE /4 , 0, 2 * Math.PI);
-    canvas.fill();
-}
-Belt.prototype.collide = function(entity){
-    var speed = blocksPerSecond(1);
-    entity.y = this.y - BLOCK_SIZE / 2; // maybe add padding attribute to objects
-    entity.falling = false;
-    if(this.movesRight){
-        entity.moveX(speed);
-    } else {
-        entity.moveX(-speed);
-    }
-}
-Belt.prototype.update = function(){
-    //do nothing
-}
 
 
-
+//next
 function Tram(x, y, destinations, autoOn){
     Machine.call(this, x, y, autoOn);
     this.destinations = [];

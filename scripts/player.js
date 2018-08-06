@@ -129,43 +129,36 @@ Player.prototype = {
         this.drawHitbox();
         
         // torso
-        var torso_size = this.width * 0.5;
+        var torsoWidth = this.width * 0.5;
+        var torsoHeight = this.height * 0.5;
+        var offSet = (this.facingMod === 1) ? 0 : torsoWidth;
         canvas.fillStyle = silver(5);
-        if (this.facingMod === -1){
-            canvas.fillRect(this.x, this.y - torso_size / 2, torso_size, torso_size);
-        } else {
-            canvas.fillRect(this.x - BLOCK_SIZE / 2, this.y - torso_size / 2, torso_size, torso_size);
-        }
+        canvas.fillRect(this.x + offSet, this.y + torsoHeight / 2, torsoWidth, torsoHeight);
         
         // treads
-        var tread_shift = 20;
-        var treadY = this.y + tread_shift;
-        var tread_width = BLOCK_SIZE;
-        
+        var treadY = this.y + torsoHeight / 2 + torsoHeight;
+        var treadWidth = this.width;
         canvas.fillStyle = "rgb(0, 0, 0)";
         canvas.beginPath();
-        canvas.moveTo(this.x, treadY);
-        canvas.lineTo(this.x - tread_width / 2, this.y + BLOCK_SIZE / 2);
-        canvas.lineTo(this.x + tread_width / 2, this.y + BLOCK_SIZE / 2);
+        canvas.moveTo(this.x + this.width / 2, treadY);
+        canvas.lineTo(this.x + this.width / 2 - treadWidth / 2, treadY + torsoHeight / 2);
+        canvas.lineTo(this.x + this.width / 2 + treadWidth / 2, treadY + torsoHeight / 2);
         canvas.fill();
         
         // arms
         canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x, this.y, (BLOCK_SIZE / 3) * this.facingMod, BLOCK_SIZE / 5);
+        var armOffset = (this.facingMod === 1) ? this.width * 0.5 : this.width * 0.25;
+        canvas.fillRect(this.x + armOffset, this.y + torsoHeight, this.width / 4, this.height / 5);
         
         // head
         canvas.fillStyle = silver(6);
-        canvas.fillRect(this.x - BLOCK_SIZE / 4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 2, BLOCK_SIZE / 4);
-    },
-    
-    show_gear:function() {
-        if (this.gears.length > 0){
-            drawGear(0, canvas_size * 0.9, canvas_size * 0.1, this.gears[this.currentGearIndex].color, false);  
-        }
+        canvas.fillRect(this.x + this.width / 4, this.y, this.width / 2, this.height / 4);
     },
     
     drawHUD:function() {
-        this.show_gear();
+        if (this.gears.length > 0){
+            drawGear(0, canvas_size * 0.9, canvas_size * 0.1, this.gears[this.currentGearIndex].color, false);  
+        }
     }
 };
 

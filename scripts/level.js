@@ -117,7 +117,7 @@ Area.prototype = {
             block.checkColl(entity);
         }
         for(var machine of this.machines){
-            machine.checkForCollide(entity);
+            machine.checkColl(entity);
         }
     },
     
