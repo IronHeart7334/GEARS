@@ -86,32 +86,21 @@ Area.prototype = {
         this.machines.forEach(function(machine){machine.init()});
     },
     
-    //energy functions have to do with machines
-    // will redo once machines are improved
+    //checks which machines are within emitting distance of others
     updateMachines : function(){
-        this.energy = []; // needs to be added by machine
-        
-        //improve this
-        function within(machine){
-            return function(coords){
-                return coords[0] === machine.x - BLOCK_SIZE && coords[1] === machine.y;
-            }
-        }
         for(machine of this.machines){
-            /*
-            if(this.energy.some(within(machine))){
-                machine.powered = true;
-            } else {
-                machine.powered = false;
-            }*/
+            function check(otherMachine){
+                var ret = false;
+                if(otherMachine.getEmitting()){
+                    ret = distance(machine.x, machine.y, otherMachine.x, otherMachine.y) < BLOCK_SIZE * 3;
+                }
+                return ret;
+            }
+            
+            machine.powered = this.machines.some(check);
             machine.checkIfUpdate();
         }
     },
-    //not implemented yet
-    addEnergy : function(x, y){
-        this.energy.push([x, y]);
-    },
-    
     checkColl : function(entity){
         for(var block of this.blocks){
             block.checkColl(entity);
@@ -138,7 +127,7 @@ Area.prototype = {
     loadPlayerRight : function(entity){
         entity.load(this.rightSpawn[0], this.rightSpawn[1]);
     }
-}
+};
 
 /*
 importDataFromFile : function(path){
@@ -176,6 +165,9 @@ Level.prototype = {
         }
         this.currentArea = this.start;
     },
+    getCurrentArea : function(){
+        return this.areas[this.currentArea];
+    },
     draw : function(){
         this.areas[this.currentArea].draw();
     },
@@ -184,7 +176,7 @@ Level.prototype = {
             //exit left
             this.currentArea--;
             this.areas[this.currentArea].loadPlayerRight(player);
-        } else if(player.x > this.areas[this.currentArea].width && this.currentArea < this.areas.length){
+        } else if(player.x > this.areas[this.currentArea].width && this.currentArea < this.areas.length - 1){
             //exit right
             this.currentArea++;
             this.areas[this.currentArea].loadPlayerLeft(player);

@@ -5,6 +5,7 @@ function Machine(x, y, autoOn){
     this.startX = x * BLOCK_SIZE;
     this.startY = y * BLOCK_SIZE;
     this.autoOn = autoOn;
+    this.emitting = false;
 }
 Machine.prototype = {
     init : function(){
@@ -13,6 +14,12 @@ Machine.prototype = {
     },
     isEnabled : function(){
         return this.powered || this.autoOn;
+    },
+    setEmitting : function(boolean){
+        this.emitting = boolean;
+    },
+    getEmitting : function(){
+        return this.emitting;
     },
     draw : function(){
         var obj = this;
@@ -75,6 +82,7 @@ Gear.prototype = {
 extend(Gear, Machine);
 
 
+
 function Belt(x, y, width, movesRight, autoOn){
     Machine.call(this, x, y, autoOn);
     this.setWidth(width * BLOCK_SIZE);
@@ -107,7 +115,7 @@ Belt.prototype = {
 extend(Belt, Machine);
 
 
-//next
+
 function Tram(x, y, destinations, autoOn){
     Machine.call(this, x, y, autoOn);
     this.destinations = [[this.startX, this.startY]];
@@ -192,39 +200,11 @@ extend(Tram, Machine);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-// Machine Classes
-
-function Generator(x, y) {
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
+function Generator(x, y){
+    Machine.call(this, x, y, true);
+    this.setHeight(BLOCK_SIZE * 2);
+    this.setEmitting(true);
 }
-
-function Door(x, y) {
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
-    this.powered = false;
-}
-
-// not finished
-function Train(x, y, width, gears){
-    this.x = x * BLOCK_SIZE;
-    this.y = y * BLOCK_SIZE;
-    this.width = width * BLOCK_SIZE;
-    this.gears = gears;
-}
-// Machine methods
-
 Generator.prototype = {
     draw:function() {
         canvas.fillStyle = silver(7);
@@ -239,23 +219,30 @@ Generator.prototype = {
     },
     
     update:function() {
-        current_level.add_energy(this.x + BLOCK_SIZE, this.y);
+        //do nothing
     }
+};
+extend(Generator, Machine);
+
+
+
+function Door(x, y){
+    Machine.call(this, x, y, false);
 }
-
 Door.prototype = {
-    check_coll:function(object) {
-        while (object.y >= this.y && object.y <= this.y + BLOCK_SIZE && object.x >= this.x + BLOCK_SIZE && object.x <= this.x + BLOCK_SIZE * 1.5){
-            object.x += 1;
-        }
-
-        while (object.y >= this.y && object.y <= this.y + BLOCK_SIZE && object.x + BLOCK_SIZE / 2 >= this.x && object.x <= this.x + BLOCK_SIZE / 2){
-            object.x -= 1;
+    collide : function(entity) {
+        if(!this.isEnabled()){
+            if(entity.x + entity.width / 2 > this.x + this.width / 2){
+                //over halfway through
+                entity.setX(this.x + this.width);
+            } else {
+                entity.setX(this.x - entity.width);
+            }
         }
     },
     
     draw:function() {
-        if (!this.powered){
+        if (!this.isEnabled()){
             canvas.fillStyle = silver(6);
             canvas.fillRect(this.x + BLOCK_SIZE / 10, this.y, BLOCK_SIZE * 0.8, BLOCK_SIZE);
         
@@ -269,48 +256,44 @@ Door.prototype = {
     },
     
     update:function() {
-        if (!this.powered){
-            this.check_coll(player);
-        }
-    }
-     
+        // do nothing
+    } 
+};
+extend(Door, Machine);
+
+
+
+// WIP.
+// a gear train
+function Train(x, y, autoOn, gearsNeeded){
+    Machine.call(this, x, y, autoOn);
+    this.setWidth(BLOCK_SIZE * gearsNeeded);
+    this.maxGears = gearsNeeded;
+    this.gearCount = 0;
+    this.rotateCount = 0;
+    this.firstRotated = true;
 }
-
-/*
-Tram.prototype = {
-    update:function(){
-        if (this.moving){
-            this.follow_path();
-            this.powered = true;
-        }
-        if (!this.powered && !this.auto_on){return;}
-        
-        if (!this.ready){return;}
-        
-        if (player.x >= this.x && player.x <= this.x + BLOCK_SIZE && player.y > this.y + BLOCK_SIZE * 1.5){
-            player.y -= GRAVITY * 2;
-           // player.falling = false;
-            if (player.y > this.y + BLOCK_SIZE * 1.5){return;}
-            player.x = this.x + BLOCK_SIZE / 2;
-            this.moving = true;
-        }
-    },
-    */
-
-// not finished
 Train.prototype = {
     draw:function(){
         canvas.fillStyle = silver(4);
         canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE);
         
-        for (gear of this.gears){
-            if (gear) {
-                draw_gear(this.x + this.gears.indexOf(gear) * BLOCK_SIZE, this.y, BLOCK_SIZE / 5, silver(2), true);
-            }
+        for(var i = 0; i < this.gearCount; i++){
+            drawGear(this.x + BLOCK_SIZE * i, this.y, BLOCK_SIZE, silver(2), (i % 2 === 0) ? this.firstRotated : !this.firstRotated);
         }
     },
-    
+    collide : function(entity){
+        //TODO: add checking for if player has gear, place it here
+    },
     update:function(){
-        return;
+        if(this.gearCount === this.maxGears){
+            this.setEmitting(true);
+            this.rotateCount++;
+            if(this.rotateCount === FPS){
+                this.rotateCount = 0;
+                this.firstRotated = !this.firstRotated;
+            }
+        }
     }
-}
+};
+extend(Train, Machine);
