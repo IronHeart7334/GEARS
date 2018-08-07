@@ -8,8 +8,7 @@ function Machine(x, y, autoOn){
 }
 Machine.prototype = {
     init : function(){
-        this.x = this.startX;
-        this.y = this.startY;
+        this.setCoords(this.startX, this.startY);
         this.powered = false;
     },
     isEnabled : function(){
@@ -111,40 +110,44 @@ extend(Belt, Machine);
 //next
 function Tram(x, y, destinations, autoOn){
     Machine.call(this, x, y, autoOn);
-    this.destinations = [];
+    this.destinations = [[this.startX, this.startY]];
     var t = this;
     destinations.forEach(function(coords){t.destinations.push([coords[0] * BLOCK_SIZE, coords[1] * BLOCK_SIZE])});
-    this.destNum = 0;
-    this.ready = true;
+    this.destNum = 0; //the index of the next destination to go to
+    this.ready = true; //has completed carrying an entity and has returned to its start point
     this.moving = false;
-    this.carrying = null;
+    this.carrying = null; //the entity this is carrying
 }
-extend(Tram, Machine);
-Tram.prototype.draw = function(){
-    canvas.fillStyle = silver(7);
-    canvas.fillRect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
-    canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
-    
-    if (this.autoOn || this.powered){
-        canvas.fillStyle = energy_color;
-        canvas.fillRect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
-    }
-}
-Tram.prototype.collide = function(entity){
-    if(this.carrying === null){
-        this.carrying = entity;
-        this.moving = true;
-    }
-}
-Tram.prototype.checkForCollide = function(entity){
-    Machine.prototype.checkForCollide.call(this, entity);
-    
-    if(!this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
-        entity.moveY(-GRAVITY * 2);
-    }
-}
-Tram.prototype.followPath = function(){
-    if(this.destinations.length > 0){
+Tram.prototype = {
+    draw : function(){
+        canvas.fillStyle = silver(7);
+        canvas.fillRect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
+        canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
+        
+        if (this.isEnabled()){
+            canvas.fillStyle = energy_color;
+            canvas.fillRect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
+        }
+    },
+    collide : function(entity){
+        if(this.ready && this.isEnabled() && this.carrying === null){
+            this.carrying = entity;
+            this.moving = true;
+            this.ready = false;
+        }
+    },
+    checkForCollide : function(entity){
+        var ret = false;
+        if(!this.moving){
+            ret = Machine.prototype.checkForCollide.call(this, entity);
+        }
+        
+        if(!this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
+            entity.moveY(-GRAVITY * 2);
+        }
+        return ret;
+    },
+    followPath : function(){
         current = this.destinations[this.destNum];
         var speed = blocksPerSecond(1);
         if (this.x > current[0]){
@@ -159,27 +162,33 @@ Tram.prototype.followPath = function(){
             this.y += speed;
         }
     
-        //todo: add checking if closest possible coords
-        if (this.x === current[0] && this.y === current[1]){
-            this.dest_num++;
-            if (this.dest_num + 1 === this.destinations.length){
-                this.ready = false;
-            }
-            if (this.dest_num === this.destinations.length){
-                this.dest_num = 0;
+        //check if we are as close as possible
+        if (between(current[0], this.x, current[0] + speed) && between(current[1], this.y, current[1] + speed)){
+            if(this.destNum === 0 && !this.ready && !this.carrying){
                 this.ready = true;
                 this.moving = false;
+            } else {
+                this.destNum++;
+            }
+            if (this.destNum === this.destinations.length){
+                //completed path
+                this.destNum = 0;
+                this.carrying = null;
             }
         }
+    },
+    update : function(){
+        if(this.moving){
+            this.followPath();
+            if(this.carrying !== null){
+                this.carrying.setCoords(this.x, this.y + this.height);
+                this.carrying.falling = false;
+            }
+            this.powered = true; //otherwise, will stop immediately upon moving
+        }
     }
-}
-Tram.prototype.update = function(){
-    if(this.moving){
-        this.followPath();
-        this.powered = true; //otherwise, will stop immediately upon moving
-    }
-}
-
+};
+extend(Tram, Machine);
 
 
 

@@ -109,8 +109,7 @@ Player.prototype = {
         }
         if(this.jumping){
             this.updateJump();
-        } else if(this.moving && !this.falling){
-            //no moving in midair
+        } else if(this.moving){
             this.moveX(this.speed * this.facingMod);
         }
         this.falling = true;

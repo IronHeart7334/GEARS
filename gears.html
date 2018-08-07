@@ -290,7 +290,7 @@
                     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
                 ],
                 [
-                    new Tram(1, -1, [], false),
+                    new Tram(1, -1, [], true),
                     new Tram(10, 1, [[17, 1]], true),
                     new Tram(10, 12, [], true),
                     new Tram(11, 12, [], true),
@@ -299,7 +299,7 @@
                     new Tram(14, 12, [], true),
                     new Tram(15, 12, [], true),
                     new Tram(16, 12, [], true),
-                    new Tram(18, 4, [[9, 4]], true),
+                    new Tram(18, 4, [[10, 4]], true),
                     new Belt(3, 6, 3, true, true),
                     new Belt(4, 9, 3, false, true)
                 ],
@@ -323,7 +323,7 @@
                 [8, 3]
             );
             
-            var current_level = new Level("Test2", [a1, a2, a3], 0, true);
+            var current_level = new Level("Test2", [a1, a2, a3], 1, false);
             
             var player = new Player();
             
@@ -332,7 +332,7 @@
         </script>
     </head>
     
-    <body onload="load_page(), load_game()"; assign_color([['controls', silver(7), color2]]);"; id="body">
+    <body onload="load_page(); load_game(); assign_color([['controls', silver(7), color2]]);" id="body">
         <div id="controls">
         	<h2>Controls</h2>
         	
