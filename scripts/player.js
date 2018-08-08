@@ -31,6 +31,8 @@ Player.prototype = {
 
         this.gears = [];
         this.currentGearIndex = -1;
+        
+        this.inventory = {}; //Key-Value pairs of String, int
     },
     load : function(x, y){
         this.setCoords(x, y); //defined by Entity
@@ -66,7 +68,20 @@ Player.prototype = {
         this.gears.push(gear);
         this.currentGearIndex = this.gears.indexOf(gear);
     },
-    
+    pickup : function(item){
+        // item is a string
+        if(this.inventory.hasOwnProperty(item)){
+            this.inventory[item]++;
+        } else {
+            this.inventory[item] = 1;
+        }
+    },
+    getHasPickup : function(itemName){
+        return this.inventory.hasOwnProperty(itemName) && this.inventory[itemName] > 0;
+    },
+    loseItem : function(itemName){
+        this.inventory[itemName]--;
+    },
     shiftGear:function() {
         // changes the currently selected gear
         if(this.gears.length === 0){

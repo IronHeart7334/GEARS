@@ -1,5 +1,4 @@
 // abstract base class for machines
-// todo: add power methods
 function Machine(x, y, autoOn){
     Entity.call(this);
     this.startX = x * BLOCK_SIZE;
@@ -78,7 +77,7 @@ Gear.prototype = {
             this.rotateCount++;
         }
     }
-}
+};
 extend(Gear, Machine);
 
 
@@ -263,7 +262,43 @@ extend(Door, Machine);
 
 
 
-// WIP.
+function PickupGear(x, y){
+    Machine.call(this, x, y, true);
+    this.claimed = false;
+    this.rotated = false;
+    this.rotateCount = 0;
+}
+PickupGear.prototype = {
+    draw : function(){
+        if(!this.claimed){
+            drawGear(this.x, this.y, BLOCK_SIZE * 0.9, gold(7), this.rotated);
+        }
+    },
+    collide : function(entity){
+        try{
+            if(!this.claimed){
+                entity.pickup("gear");
+                this.claimed = true;
+            }
+        } catch(e){
+            //not a Player
+            console.log(e.stack);
+        }
+    },
+    update : function(){
+        if(!this.claimed){
+            if(this.rotateCount === FPS){
+                this.rotated = !this.rotated;
+                this.rotateCount = 0;
+            }
+            this.rotateCount++;
+        }
+    }
+};
+extend(PickupGear, Machine);
+
+
+
 // a gear train
 function Train(x, y, autoOn, gearsNeeded){
     Machine.call(this, x, y, autoOn);
@@ -283,7 +318,15 @@ Train.prototype = {
         }
     },
     collide : function(entity){
-        //TODO: add checking for if player has gear, place it here
+        try{
+            if(entity.getHasPickup("gear") && this.gearCount < this.maxGears){
+                this.gearCount++;
+                entity.loseItem("gear");
+            }
+        } catch(e){
+            //not a player
+            console.log(e.stack);
+        }
     },
     update:function(){
         if(this.gearCount === this.maxGears){

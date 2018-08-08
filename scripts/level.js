@@ -92,7 +92,7 @@ Area.prototype = {
             function check(otherMachine){
                 var ret = false;
                 if(otherMachine.getEmitting()){
-                    ret = distance(machine.x, machine.y, otherMachine.x, otherMachine.y) < BLOCK_SIZE * 3;
+                    ret = distance(machine.x, machine.y, otherMachine.x, otherMachine.y) <= BLOCK_SIZE * 5;
                 }
                 return ret;
             }

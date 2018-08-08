@@ -32,6 +32,22 @@ function distance(x1, y1, x2, y2){
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
+function silver(value) {
+    if (value > 10) {
+        value = 10;
+    }
+    shade = value * 25;
+    return "rgb(" + shade + ", " + shade + ", " + shade + ")";
+}
+
+function gold(value) {
+    if (value > 10) {
+        value = 10;
+    }
+    shade = value * 25;
+    return "rgb(" + shade + ", " + shade + ", " + 0 + ")";
+}
+
 function drawGear(x, y, width, color, rotated){
     var size = width / 5;
     var gear1 = [
