@@ -8,83 +8,26 @@ function Block(baseColor, rimColor, x, y) {
     rimColor: the color of the frame around the block
     x: the number of blocks between this one and the leftmost side of the area it is in
     y: the number of blocks above this one and the top of the area it is in
+    hasBlockAbove: whether or not there is a block directly above this one, if it is true, 
+                    then this won't make top collision checks to prevent wall climbing
     */
     Entity.call(this);
     this.setCoords(x * BLOCK_SIZE, y * BLOCK_SIZE);
     this.baseColor = baseColor;
     this.rimColor = rimColor;
+    this.hasBlockAbove = false;
 }
 Block.prototype = {
-    draw:function(){
+    disableTop : function(){
+        //prevents top collisions when there is a block above this one
+        this.hasBlockAbove = true;
+    },
+    draw : function(){
         var shift = BLOCK_SIZE / 10;
         canvas.fillStyle = this.rimColor;
         canvas.fillRect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE);
         canvas.fillStyle = this.baseColor;
         canvas.fillRect(this.x + shift, this.y + shift, BLOCK_SIZE - shift * 2, BLOCK_SIZE - shift * 2);	
-    },
-    topColl:function(entity) {
-        // returns whether or not entity is above this, though colliding with it,
-        // also moves the entity to just above this and prevents it from falling
-        
-        var ret = false;
-        if(!entity.isWithin(this.x, this.y + 1, this.x + BLOCK_SIZE, this.y + BLOCK_SIZE)){
-            // not just clipping the side
-            if(entity.isWithin(
-                this.x + BLOCK_SIZE * 0.25,
-                this.y - BLOCK_SIZE,
-                this.x + BLOCK_SIZE * 0.75,
-                this.y + BLOCK_SIZE / 2
-                )
-            ){
-                ret = true;
-                entity.falling = false; //TODO: individual collisions reactions per entity
-                entity.y = this.y - entity.height;
-            }
-        } else {
-            console.log("no top collide b/c left or right");
-        }
-        return ret;
-    },
-    //buggy
-    bottomColl:function(entity){
-        var ret = false;
-        if(entity.isWithin(
-            this.x - 1,
-            this.y + BLOCK_SIZE / 2,
-            this.x + BLOCK_SIZE + 1,
-            this.y + this.height
-        )){
-            console.log("clunk");
-            entity.y = this.y + this.height;
-            ret = true;
-        }
-        return ret;
-    },
-    leftColl:function(entity) {
-        var ret = false;
-        if(entity.isWithin(
-            this.x,
-            this.y,
-            this.x + BLOCK_SIZE / 2,
-            this.y + BLOCK_SIZE
-        )){
-            entity.x = this.x - entity.width;
-            ret = true;
-        }
-        return ret;
-    },
-    rightColl:function(entity) {
-        var ret = false;
-        if(entity.isWithin(
-            this.x + BLOCK_SIZE / 2,
-            this.y,
-            this.x + BLOCK_SIZE,
-            this.y + BLOCK_SIZE
-        )){
-            entity.x = this.x + entity.width;
-            ret = true;
-        }
-        return ret;
     },
     shoveOut : function(entity){
         // yay! finally works!
@@ -125,7 +68,7 @@ Block.prototype = {
             theta = (xDiff > 0) ? 0 : 180;
         }
         
-        if(between(45, theta, 135)){
+        if(!this.hasBlockAbove && between(45, theta, 135)){
             //top
             entity.setY(this.y - entity.height);
             entity.falling = false;
@@ -144,15 +87,10 @@ Block.prototype = {
     },
     checkColl(entity){
         var ret = false;
-        // since js short circuit evaluates, only 1 collision reaction will happen
-        //nope. still not working. Need general "on collide" that checks for top, bottom, etc.
-        /*
-        if(this.topColl(entity) || this.bottomColl(entity) || this.leftColl(entity) || this.rightColl(entity)){
-            ret = true;
-        }*/
-       if(this.checkForCollide(entity)){
+        if(this.checkForCollide(entity)){
            this.shoveOut(entity);
-       }
+           ret = true;
+        }
         return ret;
     }	
 };

@@ -340,3 +340,58 @@ Train.prototype = {
     }
 };
 extend(Train, Machine);
+
+
+
+function Lift(x, y, autoOn, distUp){
+    //distUp is the amount of blocks it will move up
+    Machine.call(this, x, y, autoOn);
+    this.setHeight(BLOCK_SIZE / 10);
+    this.maxAscent = this.startY - distUp * BLOCK_SIZE;
+    this.goingUp = true;
+    this.moving = false;
+    this.waiting = false; //waiting to go back down
+    this.waitTime = 0;
+}
+Lift.prototype = {
+    draw : function(){
+        canvas.fillStyle = silver(3);
+        canvas.fillRect(this.x, this.y - BLOCK_SIZE / 10, this.width, this.height);
+    },
+    collide : function(entity){
+        entity.setY(this.y - entity.height);
+        this.moving = true;
+    },
+    update : function(){
+        if(this.moving){
+            var speed = blocksPerSecond(2);
+            if(this.goingUp){
+                speed = -speed;
+            }
+            
+            if(!this.waiting){
+                this.moveY(speed);
+            }
+            
+            if(this.waiting){
+                if(this.waitTime === FPS * 2){
+                    this.waitTime = 0;
+                    this.waiting = false;
+                } else {
+                    this.waitTime++;
+                }
+            }
+            
+            //remember, higher y means further down
+            if(this.y <= this.maxAscent && this.goingUp){
+                this.goingUp = false;
+                this.waiting = true;
+            } else if(this.y >= this.startY && !this.goingUp){
+                this.goingUp = true;
+                this.moving = false;
+                this.waiting = true;
+            }
+        }
+    }
+};
+extend(Lift, Machine);

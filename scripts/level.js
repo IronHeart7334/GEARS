@@ -75,7 +75,11 @@ Area.prototype = {
             for(var column = 0; column < map[row].length; column++){
                 if(map[row][column] !== 0){
                     // a 0 corresponds to 'no block', a 1 is the block type at index 0 of blockConstructors etc.
-                    this.blocks.push(new this.blockConstructors[map[row][column] - 1](column, row));
+                    var newBlock = new this.blockConstructors[map[row][column] - 1](column, row);
+                    if(row !== 0 && map[row - 1][column] !== 0){
+                        newBlock.disableTop();
+                    }
+                    this.blocks.push(newBlock);
                 }
             }
         }
