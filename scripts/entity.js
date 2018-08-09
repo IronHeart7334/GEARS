@@ -4,6 +4,7 @@ function Entity(){
     this.y = 0;
     this.width = BLOCK_SIZE;
     this.height = BLOCK_SIZE;
+    this.hostingGame = null; //the game where this entity is used
 }
 
 Entity.prototype = {
@@ -52,6 +53,12 @@ Entity.prototype = {
             (this.x <= x2) &&
             (this.y <= y2)
         );
+    },
+    setHostingGame : function(game){
+        this.hostingGame = game;
+    },
+    getHost : function(){
+        return this.hostingGame;
     }
 };
 

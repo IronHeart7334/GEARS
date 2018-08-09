@@ -12,6 +12,7 @@
         <script src="scripts/player.js"></script>
         <script src="scripts/level.js"></script>
         <script src="levelData/levels.js"></script>
+        <script src="scripts/game.js"></script>
         <style>
             div {
                 border-style: groove;
@@ -28,26 +29,16 @@
         </style>
         
         <script>
-            var FPS = 20;
+            var GAME;
+            var player;
+            
             function blocksPerSecond(blocks){
-                return BLOCK_SIZE * blocks / FPS;
+                return BLOCK_SIZE * blocks / GAME.fps;
             }
+            
             // Variable globalization
             var current_level;
-            var GRAVITY = blocksPerSecond(3);
-            var game_timer;
-            var timer_started;
-            
-            
-            function pause() {
-                clearInterval(game_timer);
-                timer_started = false;
-            }
-            
-            function resume() {
-                game_timer = setInterval(update_frame, 1000 / FPS);
-                timer_started = true;
-            }
+            //var GRAVITY = blocksPerSecond(3);
             
             function assign_color(changes) {
                 for (var alter of changes) {
@@ -58,10 +49,15 @@
             }
 
             function load_game() {
-                //load_canvas();
+                GAME = new Game();
+                player = new Player();
                 current_level.load();
+                GAME.setHost(canvas);
+                GAME.setPlayer(player);
+                GAME.setLevel(current_level);
+                //load_canvas();
                 current_level.play(player);
-                resume();
+                GAME.resume();
             }
 
             function keyDown(event){
@@ -80,10 +76,8 @@
                         player.shiftGear();
                         break;
                     case 'p':
-                        if (timer_started){
-                                        pause();
-                                } else {resume();}
-                                break;
+                        GAME.togglePause();
+                        break;
                 }
             }
             function keyUp(event){
@@ -100,46 +94,28 @@
 
             document.addEventListener("keydown", keyDown);
             document.addEventListener("keyup", keyUp);
-
-            function update_frame() {
-                canvas.fillStyle = "black";
-                canvas.fillRect(0, 0, canvas_size, canvas_size);
-
-                update_camera();
-                player.update();
-                current_level.update();
-
-                current_level.draw();
-                player.draw();
-
-                reset_camera();
-
-                player.drawHUD();
-            }
-            
-            var player = new Player();
         </script>
     </head>
     
     <body onload="load_page(); load_game(); assign_color([['controls', silver(7), color2]]);" id="body">
         <div id="controls">
-        	<h2>Controls</h2>
-        	
-        	<h3>W</h3>
-        	<p>Jump</p>
-        	
-        	<h3>Shift</h3>
-        	<p>Change gears</p>
-        	
-        	<h3>A:</h3>
-        	<p>Move left</p>
-        	
-        	<h3>D:</h3>
-        	<p>Move right</p>
-        	
-        	<h3>P</h3>
-        	<p>Pause/unpause</p>
-        	<i>Bugged</i>
+            <h2>Controls</h2>
+
+            <h3>W</h3>
+            <p>Jump</p>
+
+            <h3>Shift</h3>
+            <p>Change gears</p>
+
+            <h3>A:</h3>
+            <p>Move left</p>
+
+            <h3>D:</h3>
+            <p>Move right</p>
+
+            <h3>P</h3>
+            <p>Pause/unpause</p>
+            <i>Bugged</i>
         </div>
         
     </body>

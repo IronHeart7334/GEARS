@@ -55,6 +55,7 @@ function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
     // + 0.5 is for a half-block offset
     this.leftSpawn = [leftSpawn[0] * BLOCK_SIZE, leftSpawn[1] * BLOCK_SIZE];
     this.rightSpawn = [rightSpawn[0] * BLOCK_SIZE, rightSpawn[1] * BLOCK_SIZE];
+    this.hostingGame = null;
 }
 Area.prototype = {
     loadMap : function(){
@@ -130,6 +131,14 @@ Area.prototype = {
     
     loadPlayerRight : function(entity){
         entity.load(this.rightSpawn[0], this.rightSpawn[1]);
+    },
+    setHostingGame : function(game){
+        this.hostingGame = game;
+        function copyHost(entity){
+            entity.setHostingGame(game);
+        }
+        this.blocks.forEach(copyHost);
+        this.machines.forEach(copyHost);
     }
 };
 
@@ -154,11 +163,15 @@ function Level(name, areas, startAreaNumber, spawnsOnLeft){
     this.areas = areas;
     this.start = startAreaNumber;
     this.spawnLeft = spawnsOnLeft;
+    this.hostingGame = null;
 }
 Level.prototype = {
     load : function(){
         //loads the area data into memory, does not start the level
-        this.areas.forEach(function(area){area.loadMap();});
+        this.areas.forEach(function(area){
+            area.loadMap();
+            area.setHostingGame(this.hostingGame);
+        });
     },
     play : function(player){
         var area = this.areas[this.start];
@@ -186,8 +199,12 @@ Level.prototype = {
             this.areas[this.currentArea].loadPlayerLeft(player);
         }
         this.areas[this.currentArea].update();
+    },
+    setHostingGame : function(game){
+        this.hostingGame = game;
+        this.areas.forEach(function(area){area.setHostingGame(game);});
     }
-}
+};
 
 Level.currentlyPlaying = null;
 Level.getCurrent = function(){

@@ -70,7 +70,7 @@ Gear.prototype = {
     },
     update : function(){
         if(!this.claimed){
-            if(this.rotateCount === FPS){
+            if(this.rotateCount === this.getHost().fps){
                 this.rotated = !this.rotated;
                 this.rotateCount = 0;
             }
@@ -150,7 +150,8 @@ Tram.prototype = {
         }
         
         if(!this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
-            entity.moveY(-GRAVITY * 2);
+            entity.moveY(-blocksPerSecond(2));
+            entity.falling = false;
         }
         return ret;
     },
@@ -287,7 +288,7 @@ PickupGear.prototype = {
     },
     update : function(){
         if(!this.claimed){
-            if(this.rotateCount === FPS){
+            if(this.rotateCount === this.getHost().fps){
                 this.rotated = !this.rotated;
                 this.rotateCount = 0;
             }

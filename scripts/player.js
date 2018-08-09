@@ -47,7 +47,7 @@ Player.prototype = {
     fall:function() {
         // don't mess with my jumping
         if(!this.jumping){
-            this.moveY(GRAVITY);
+            this.moveY(blocksPerSecond(3));
         }
     },
     
@@ -105,7 +105,7 @@ Player.prototype = {
         }
     },
     updateJump : function(){
-        var jumpTime = FPS / 2; //time it takes to finish jump
+        var jumpTime = this.getHost().fps / 2; //time it takes to finish jump
         this.moveX(this.jumpX * this.facingMod / jumpTime);
         this.moveY(-this.jumpY / jumpTime);
         this.timeInJump++;
