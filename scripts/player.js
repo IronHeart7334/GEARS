@@ -128,6 +128,7 @@ Player.prototype = {
             this.moveX(this.speed * this.facingMod);
         }
         this.falling = true;
+        
         if(this.y >= current_level.areas[current_level.currentArea].height){
             //respawn if we fall off the map
             this.respawn();

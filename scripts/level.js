@@ -188,3 +188,15 @@ Level.prototype = {
         this.areas[this.currentArea].update();
     }
 }
+
+Level.currentlyPlaying = null;
+Level.getCurrent = function(){
+    try{
+        if(Level.currentlyPlaying === null){
+            throw new Error("There is no level currently being played");
+        }
+    } catch(e){
+        console.log(e.stack);
+    }
+    return Level.currentlyPlaying;
+};

@@ -1,6 +1,7 @@
 /*
 The Block class is used to generate the platforms that the player interacts with.
 */
+var BLOCK_SIZE = canvas_size / 10;
 
 function Block(baseColor, rimColor, x, y) {
     /*
