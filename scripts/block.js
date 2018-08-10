@@ -1,7 +1,7 @@
 /*
 The Block class is used to generate the platforms that the player interacts with.
 */
-var BLOCK_SIZE = canvas_size / 10;
+var BLOCK_SIZE = canvas_size / 10; //may want to redo this as a strict size
 
 function Block(baseColor, rimColor, x, y) {
     /*
@@ -23,12 +23,12 @@ Block.prototype = {
         //prevents top collisions when there is a block above this one
         this.hasBlockAbove = true;
     },
-    draw : function(){
+    draw : function(canvas){
         var shift = BLOCK_SIZE / 10;
-        canvas.fillStyle = this.rimColor;
-        canvas.fillRect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE);
-        canvas.fillStyle = this.baseColor;
-        canvas.fillRect(this.x + shift, this.y + shift, BLOCK_SIZE - shift * 2, BLOCK_SIZE - shift * 2);	
+        canvas.setColor(this.rimColor);
+        canvas.rect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE);
+        canvas.setColor(this.baseColor);
+        canvas.rect(this.x + shift, this.y + shift, BLOCK_SIZE - shift * 2, BLOCK_SIZE - shift * 2);	
     },
     shoveOut : function(entity){
         // yay! finally works!

@@ -53,9 +53,9 @@ Game.prototype = {
         
         this.hostingCanvas.setFocus(this.player.x, this.player.y);
         this.hostingCanvas.updateTranslate();
-        this.currentLevel.draw();
-        this.player.draw();
+        this.currentLevel.draw(this.hostingCanvas);
+        this.player.draw(this.hostingCanvas);
         this.hostingCanvas.resetTranslate();
-        this.player.drawHUD();
+        this.player.drawHUD(this.hostingCanvas);
     }
 };

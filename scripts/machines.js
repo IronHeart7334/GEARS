@@ -20,7 +20,7 @@ Machine.prototype = {
     getEmitting : function(){
         return this.emitting;
     },
-    draw : function(){
+    draw : function(canvas){
         var obj = this;
         throw new Error("No draw method found for " + obj);
     },
@@ -52,9 +52,9 @@ function Gear(x, y, jump){
 }
 
 Gear.prototype = {
-    draw : function(){
+    draw : function(canvas){
         if(!this.claimed){
-            drawGear(this.x, this.y, BLOCK_SIZE * 0.9, this.jump.color, this.rotated);
+            canvas.drawGear(this.x, this.y, BLOCK_SIZE * 0.9, this.jump.color, this.rotated);
         }
     },
     collide : function(entity){
@@ -88,18 +88,18 @@ function Belt(x, y, width, movesRight, autoOn){
     this.movesRight = movesRight;
 }
 Belt.prototype = {
-    draw : function(){
-        canvas.fillStyle = "rgb(0, 0, 0)";
-        canvas.fillRect(this.x + BLOCK_SIZE / 2, this.y, this.width - BLOCK_SIZE / 2, this.height);
+    draw : function(canvas){
+        canvas.setColor("rgb(0, 0, 0)");
+        canvas.rect(this.x + BLOCK_SIZE / 2, this.y, this.width - BLOCK_SIZE, this.height);
         
-        canvas.fillStyle = silver(7);
-        canvas.beginPath();
-        canvas.arc(this.x + BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
-        canvas.fill();
+        canvas.setColor(silver(7));
+        canvas.draw.beginPath();
+        canvas.draw.arc(this.x + BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
+        canvas.draw.fill();
         
-        canvas.beginPath();
-        canvas.arc(this.x + this.width - BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
-        canvas.fill();
+        canvas.draw.beginPath();
+        canvas.draw.arc(this.x + this.width - BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
+        canvas.draw.fill();
     },
     collide : function(entity){
         var speed = blocksPerSecond(1);
@@ -126,14 +126,14 @@ function Tram(x, y, destinations, autoOn){
     this.carrying = null; //the entity this is carrying
 }
 Tram.prototype = {
-    draw : function(){
-        canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
-        canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
+    draw : function(canvas){
+        canvas.setColor(silver(7));
+        canvas.rect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
+        canvas.rect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
         
         if (this.isEnabled()){
-            canvas.fillStyle = energy_color;
-            canvas.fillRect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
+            canvas.setColor(energy_color);
+            canvas.rect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
         }
     },
     collide : function(entity){
@@ -206,16 +206,16 @@ function Generator(x, y){
     this.setEmitting(true);
 }
 Generator.prototype = {
-    draw:function() {
-        canvas.fillStyle = silver(7);
-        canvas.fillRect(this.x + BLOCK_SIZE * 0.1, this.y - BLOCK_SIZE, BLOCK_SIZE * 0.8, BLOCK_SIZE * 2);
+    draw:function(canvas) {
+        canvas.setColor(silver(7));
+        canvas.rect(this.x + BLOCK_SIZE * 0.1, this.y - BLOCK_SIZE, BLOCK_SIZE * 0.8, BLOCK_SIZE * 2);
         
-        canvas.fillStyle = silver(4);
-        canvas.fillRect(this.x, this.y - BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 2);
-        canvas.fillRect(this.x, this.y + BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE / 2);
+        canvas.setColor(silver(4));
+        canvas.rect(this.x, this.y - BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 2);
+        canvas.rect(this.x, this.y + BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE / 2);
         
-        canvas.fillStyle = energy_color;
-        canvas.fillRect(this.x + BLOCK_SIZE * 0.4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 5, BLOCK_SIZE);
+        canvas.setColor(energy_color);
+        canvas.rect(this.x + BLOCK_SIZE * 0.4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 5, BLOCK_SIZE);
     },
     
     update:function() {
@@ -241,18 +241,18 @@ Door.prototype = {
         }
     },
     
-    draw:function() {
+    draw:function(canvas) {
         if (!this.isEnabled()){
-            canvas.fillStyle = silver(6);
-            canvas.fillRect(this.x + BLOCK_SIZE / 10, this.y, BLOCK_SIZE * 0.8, BLOCK_SIZE);
+            canvas.setColor(silver(6));
+            canvas.rect(this.x + BLOCK_SIZE / 10, this.y, BLOCK_SIZE * 0.8, BLOCK_SIZE);
         
-            canvas.fillStyle = "rgb(0, 0, 0)";
-            canvas.fillRect(this.x + BLOCK_SIZE / 10, this.y + BLOCK_SIZE / 2, BLOCK_SIZE * 0.8, 1);
+            canvas.setColor("rgb(0, 0), 0)");
+            canvas.rect(this.x + BLOCK_SIZE / 10, this.y + BLOCK_SIZE / 2, BLOCK_SIZE * 0.8, 1);
         }
 
-        canvas.fillStyle = silver(2);
-        canvas.fillRect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE / 10);
-        canvas.fillRect(this.x, this.y + BLOCK_SIZE * 0.9, BLOCK_SIZE, BLOCK_SIZE / 10);
+        canvas.setColor(silver(2));
+        canvas.rect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE / 10);
+        canvas.rect(this.x, this.y + BLOCK_SIZE * 0.9, BLOCK_SIZE, BLOCK_SIZE / 10);
     },
     
     update:function() {
@@ -270,9 +270,9 @@ function PickupGear(x, y){
     this.rotateCount = 0;
 }
 PickupGear.prototype = {
-    draw : function(){
+    draw : function(canvas){
         if(!this.claimed){
-            drawGear(this.x, this.y, BLOCK_SIZE * 0.9, gold(7), this.rotated);
+            canvas.drawGear(this.x, this.y, BLOCK_SIZE * 0.9, gold(7), this.rotated);
         }
     },
     collide : function(entity){
@@ -310,12 +310,12 @@ function Train(x, y, autoOn, gearsNeeded){
     this.firstRotated = true;
 }
 Train.prototype = {
-    draw:function(){
-        canvas.fillStyle = silver(4);
-        canvas.fillRect(this.x, this.y, this.width, BLOCK_SIZE);
+    draw:function(canvas){
+        canvas.setColor(silver(4));
+        canvas.rect(this.x, this.y, this.width, BLOCK_SIZE);
         
         for(var i = 0; i < this.gearCount; i++){
-            drawGear(this.x + BLOCK_SIZE * i, this.y, BLOCK_SIZE, silver(2), (i % 2 === 0) ? this.firstRotated : !this.firstRotated);
+            canvas.drawGear(this.x + BLOCK_SIZE * i, this.y, BLOCK_SIZE, silver(2), (i % 2 === 0) ? this.firstRotated : !this.firstRotated);
         }
     },
     collide : function(entity){
@@ -333,7 +333,7 @@ Train.prototype = {
         if(this.gearCount === this.maxGears){
             this.setEmitting(true);
             this.rotateCount++;
-            if(this.rotateCount === FPS){
+            if(this.rotateCount === this.getHost().fps){
                 this.rotateCount = 0;
                 this.firstRotated = !this.firstRotated;
             }
@@ -355,9 +355,9 @@ function Lift(x, y, autoOn, distUp){
     this.waitTime = 0;
 }
 Lift.prototype = {
-    draw : function(){
-        canvas.fillStyle = silver(3);
-        canvas.fillRect(this.x, this.y - BLOCK_SIZE / 10, this.width, this.height);
+    draw : function(canvas){
+        canvas.setColor(silver(3));
+        canvas.rect(this.x, this.y - BLOCK_SIZE / 10, this.width, this.height);
     },
     collide : function(entity){
         entity.setY(this.y - entity.height);
@@ -375,7 +375,7 @@ Lift.prototype = {
             }
             
             if(this.waiting){
-                if(this.waitTime === FPS * 2){
+                if(this.waitTime === this.getHost().fps * 2){
                     this.waitTime = 0;
                     this.waiting = false;
                 } else {

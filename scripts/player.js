@@ -1,6 +1,7 @@
 /*
  * The Player class is used to construct the player object initialized by the HTML page
  */
+
 function Player() {
     Entity.call(this);
     this.setWidth(BLOCK_SIZE * 0.9);
@@ -129,50 +130,50 @@ Player.prototype = {
         }
         this.falling = true;
         
-        if(this.y >= current_level.areas[current_level.currentArea].height){
+        if(this.y >= this.hostingGame.currentLevel.getCurrentArea().height){
             //respawn if we fall off the map
             this.respawn();
         }
     },
     
-    drawHitbox:function(){
-        canvas.fillStyle = "rgb(255, 255, 255)";
-        canvas.fillRect(this.x, this.y, this.width, this.height);
+    drawHitbox:function(canvas){
+        canvas.setColor("rgb(255, 255, 255)");
+        canvas.rect(this.x, this.y, this.width, this.height);
     },
     
-    draw:function() {
-        this.drawHitbox();
+    draw:function(canvas) {
+        this.drawHitbox(canvas);
         
         // torso
         var torsoWidth = this.width * 0.5;
         var torsoHeight = this.height * 0.5;
         var offSet = (this.facingMod === 1) ? 0 : torsoWidth;
-        canvas.fillStyle = silver(5);
-        canvas.fillRect(this.x + offSet, this.y + torsoHeight / 2, torsoWidth, torsoHeight);
+        canvas.setColor(silver(5));
+        canvas.rect(this.x + offSet, this.y + torsoHeight / 2, torsoWidth, torsoHeight);
         
         // treads
         var treadY = this.y + torsoHeight / 2 + torsoHeight;
         var treadWidth = this.width;
-        canvas.fillStyle = "rgb(0, 0, 0)";
-        canvas.beginPath();
-        canvas.moveTo(this.x + this.width / 2, treadY);
-        canvas.lineTo(this.x + this.width / 2 - treadWidth / 2, treadY + torsoHeight / 2);
-        canvas.lineTo(this.x + this.width / 2 + treadWidth / 2, treadY + torsoHeight / 2);
-        canvas.fill();
+        canvas.setColor("rgb(0, 0, 0)");
+        canvas.draw.beginPath();
+        canvas.draw.moveTo(this.x + this.width / 2, treadY);
+        canvas.draw.lineTo(this.x + this.width / 2 - treadWidth / 2, treadY + torsoHeight / 2);
+        canvas.draw.lineTo(this.x + this.width / 2 + treadWidth / 2, treadY + torsoHeight / 2);
+        canvas.draw.fill();
         
         // arms
-        canvas.fillStyle = silver(7);
+        canvas.setColor(silver(7));
         var armOffset = (this.facingMod === 1) ? this.width * 0.5 : this.width * 0.25;
-        canvas.fillRect(this.x + armOffset, this.y + torsoHeight, this.width / 4, this.height / 5);
+        canvas.rect(this.x + armOffset, this.y + torsoHeight, this.width / 4, this.height / 5);
         
         // head
-        canvas.fillStyle = silver(6);
-        canvas.fillRect(this.x + this.width / 4, this.y, this.width / 2, this.height / 4);
+        canvas.setColor(silver(6));
+        canvas.rect(this.x + this.width / 4, this.y, this.width / 2, this.height / 4);
     },
     
-    drawHUD:function() {
+    drawHUD:function(canvas){
         if (this.gears.length > 0){
-            drawGear(0, canvas_size * 0.9, canvas_size * 0.1, this.gears[this.currentGearIndex].color, false);  
+            canvas.drawGear(0, canvas.width * 0.9, canvas.height * 0.1, this.gears[this.currentGearIndex].color, false);  
         }
     }
 };

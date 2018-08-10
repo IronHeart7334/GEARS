@@ -115,9 +115,9 @@ Area.prototype = {
         }
     },
     
-    draw : function(){
-        this.blocks.forEach(function(block){block.draw();});
-        this.machines.forEach(function(machine){machine.draw();});
+    draw : function(canvas){
+        this.blocks.forEach(function(block){block.draw(canvas);});
+        this.machines.forEach(function(machine){machine.draw(canvas);});
     },
     
     update : function(){
@@ -187,8 +187,8 @@ Level.prototype = {
     getCurrentArea : function(){
         return this.areas[this.currentArea];
     },
-    draw : function(){
-        this.areas[this.currentArea].draw();
+    draw : function(canvas){
+        this.areas[this.currentArea].draw(canvas);
     },
     update : function(){
         if(player.x < 0 && this.currentArea != 0){

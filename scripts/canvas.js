@@ -1,6 +1,3 @@
-//redo this
-var base_canvas;
-var canvas;
 var canvas_size = 700;
 
 function Canvas(){
@@ -64,9 +61,50 @@ Canvas.prototype = {
     resetTranslate : function(){
         this.draw.restore();
     },
+    setColor : function(color){
+        this.draw.fillStyle = color;
+    },
+    rect : function(x, y, w, h){
+        this.draw.fillRect(x, y, w, h);
+    },
+    drawGear : function(x, y, width, color, rotated){
+        var size = width / 5;
+        var gear1 = [
+            [1, 0, 1, 0, 1],
+            [0, 1, 1, 1, 0],
+            [1, 1, 0, 1, 1],
+            [0, 1, 1, 1, 0],
+            [1, 0, 1, 0, 1]
+        ];
+
+        var gear2 = [
+            [0, 1, 0, 1, 0],
+            [1, 1, 1, 1, 1],
+            [0, 1, 0, 1, 0],
+            [1, 1, 1, 1, 1],
+            [0, 1, 0, 1, 0]
+        ];
+
+        if (!rotated){
+            var gear_map = gear1;
+        }
+
+        if (rotated){
+            var gear_map = gear2;
+        }
+        this.setColor(color);
+
+        for (var row = 0; row < gear_map.length; row++) {
+            for (var column = 0; column < gear_map[row].length; column++){
+                if (gear_map[row][column] !== 0){
+                    this.rect(x + size * row, y + size * column, size, size);
+                }	
+            }
+        }
+    },
     clear : function(){
-        this.draw.fillStyle = "white";
-        this.draw.fillRect(0, 0, this.width, this.height);
+        this.setColor("white");
+        this.rect(0, 0, this.width, this.height);
     }
 };
 
@@ -97,6 +135,4 @@ function load_page() {
     fresh_canvas.style.top = "0px";
     fresh_canvas.style.left = "0px";
     body.appendChild(fresh_canvas);
-    base_canvas = document.getElementById("canvas");
-    canvas = base_canvas.getContext("2d");
 }
