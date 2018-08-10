@@ -2,25 +2,71 @@
 var base_canvas;
 var canvas;
 var canvas_size = 700;
-var camera_shift = [canvas_size / 2, canvas_size * 0.67];
 
-
-var canvas2 = {
-    linked : null,
-    width : 0,
-    height : 0,
-    xBound : 0,
-    yBound : 0,
-    setSize : function(w, h){
-        this.width = w;
-        this.height = h;
-        this.xBound = w;
-        this.yBound = h;
+function Canvas(){
+    this.linked = null; //the HTML canvas this will reference
+    this.draw = null; //the context this will draw on
+    this.width = 0;
+    this.height = 0;
+    this.xBound = 0; //the most this can be translated
+    this.yBound = 0;
+    this.xOffset = 0; //how much this is translated
+    this.yOffset = 0;
+    this.focusX = 0; //the point this is focusing on
+    this.focusY = 0;
+}
+Canvas.prototype = {
+    link : function(elementId){
+        try{
+            this.linked = document.getElementById(elementId);
+            this.draw = this.linked.getContext("2d");
+            this.width = this.linked.width;
+            this.height = this.linked.height;
+            this.xBound = this.width;
+            this.yBound = this.height;
+        } catch(e){
+            console.log("Error linking to canvas with id " + elementId);
+            console.log(e.stack);
+        }
     },
-    setContentSize : function(x, y){
-        //the most the canvas can be translated by
-        this.xBound = this.width - x;
-        this.yBound = this.height - y;
+    setContentSize : function(w, h){
+        //how much this should be allowed to translate
+        this.xBound = this.width - w;
+        this.yBound = this.height - h;
+    },
+    setOffsets : function(x, y){
+        this.xOffset = x;
+        this.yOffset = y;
+    },
+    setFocus : function(x, y){
+        this.focusX = x;
+        this.focusY = y;
+    },
+    updateTranslate : function(){
+        this.draw.save();
+        var xShift = -this.focusX + this.xOffset;
+        var yShift = -this.focusY + this.yOffset;
+        
+        if(xShift > 0){
+            xShift = 0;
+        } else if(xShift < this.xBound){
+            xShift = this.xBound;
+        }
+        
+        if(yShift > 0){
+            yShift = 0;
+        } else if(yShift < this.yBound){
+            yShift = this.yBound;
+        }
+        
+        this.draw.translate(xShift, yShift);
+    },
+    resetTranslate : function(){
+        this.draw.restore();
+    },
+    clear : function(){
+        this.draw.fillStyle = "white";
+        this.draw.fillRect(0, 0, this.width, this.height);
     }
 };
 
@@ -40,40 +86,6 @@ var block_colors = [
     [silver(3), silver(4)],
     [gold(4), gold(9)]
 ];
-
-// Camera functions
-
-function update_camera() {
-    canvas.save();
-    var x_shift = -player.x + camera_shift[0];
-    var y_shift = -player.y + camera_shift[1];
-
-            // left
-    if (x_shift > 0){
-        x_shift = 0;
-    }
-
-    // right
-    if (x_shift < canvas_size - current_level.areas[current_level.currentArea].width) {
-        x_shift = canvas_size - current_level.areas[current_level.currentArea].width;
-    }
-
-    // top
-    if (y_shift > 0){
-        y_shift = 0;
-    }
-
-    // bottom
-    if (y_shift < canvas_size - current_level.areas[current_level.currentArea].height){
-        y_shift = canvas_size - current_level.areas[current_level.currentArea].height;
-    }
-
-    canvas.translate(x_shift, y_shift);
-}
-
-function reset_camera() {
-    canvas.restore();
-}
 
 function load_page() {
     var body = document.getElementById("body");

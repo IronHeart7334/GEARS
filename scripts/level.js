@@ -181,6 +181,8 @@ Level.prototype = {
             player.init(area.rightSpawn[0], area.rightSpawn[1]);
         }
         this.currentArea = this.start;
+        var ca = this.getCurrentArea();
+        this.hostingGame.hostingCanvas.setContentSize(ca.width, ca.height);
     },
     getCurrentArea : function(){
         return this.areas[this.currentArea];
@@ -193,10 +195,14 @@ Level.prototype = {
             //exit left
             this.currentArea--;
             this.areas[this.currentArea].loadPlayerRight(player);
+            var ca = this.getCurrentArea();
+            this.hostingGame.hostingCanvas.setContentSize(ca.width, ca.height);
         } else if(player.x > this.areas[this.currentArea].width && this.currentArea < this.areas.length - 1){
             //exit right
             this.currentArea++;
             this.areas[this.currentArea].loadPlayerLeft(player);
+            var ca = this.getCurrentArea();
+            this.hostingGame.hostingCanvas.setContentSize(ca.width, ca.height);
         }
         this.areas[this.currentArea].update();
     },
@@ -204,16 +210,4 @@ Level.prototype = {
         this.hostingGame = game;
         this.areas.forEach(function(area){area.setHostingGame(game);});
     }
-};
-
-Level.currentlyPlaying = null;
-Level.getCurrent = function(){
-    try{
-        if(Level.currentlyPlaying === null){
-            throw new Error("There is no level currently being played");
-        }
-    } catch(e){
-        console.log(e.stack);
-    }
-    return Level.currentlyPlaying;
 };

@@ -46,14 +46,16 @@ Game.prototype = {
     update : function(){
         var c = this.hostingCanvas;
         c.fillStyle = "black";
-        c.fillRect(0, 0, c.width, c.height);
+        c.clear();
         
-        update_camera();
         this.player.update();
         this.currentLevel.update();
+        
+        this.hostingCanvas.setFocus(this.player.x, this.player.y);
+        this.hostingCanvas.updateTranslate();
         this.currentLevel.draw();
         this.player.draw();
-        reset_camera();
+        this.hostingCanvas.resetTranslate();
         this.player.drawHUD();
     }
 };

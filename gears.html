@@ -52,10 +52,13 @@
                 GAME = new Game();
                 player = new Player();
                 current_level.load();
-                GAME.setHost(canvas);
+                
+                var c = new Canvas();
+                c.link("canvas");
+                c.setOffsets(c.width / 2, c.height / 2);
+                GAME.setHost(c);
                 GAME.setPlayer(player);
                 GAME.setLevel(current_level);
-                //load_canvas();
                 current_level.play(player);
                 GAME.resume();
             }
