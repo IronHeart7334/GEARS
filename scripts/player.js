@@ -154,12 +154,12 @@ Player.prototype = {
         // treads
         var treadY = this.y + torsoHeight / 2 + torsoHeight;
         var treadWidth = this.width;
-        canvas.setColor("rgb(0, 0, 0)");
-        canvas.draw.beginPath();
-        canvas.draw.moveTo(this.x + this.width / 2, treadY);
-        canvas.draw.lineTo(this.x + this.width / 2 - treadWidth / 2, treadY + torsoHeight / 2);
-        canvas.draw.lineTo(this.x + this.width / 2 + treadWidth / 2, treadY + torsoHeight / 2);
-        canvas.draw.fill();
+        canvas.setColor("black");
+        canvas.triangle(
+                this.x + this.width / 2, treadY,
+                this.x + this.width / 2 - treadWidth / 2, treadY + torsoHeight / 2,
+                this.x + this.width / 2 + treadWidth / 2, treadY + torsoHeight / 2
+                );
         
         // arms
         canvas.setColor(silver(7));

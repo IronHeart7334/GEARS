@@ -1,7 +1,6 @@
-var canvas_size = 700;
+var canvas_size = 700; //used to create the canvas
 
-//still need to implement triangle, shape, and sprite methods, then apply to player class
-
+//TODO: sprites
 
 function Canvas(){
     this.linked = null; //the HTML canvas this will reference
@@ -67,6 +66,28 @@ Canvas.prototype = {
     setColor : function(color){
         this.draw.fillStyle = color;
     },
+    shape : function(coords){
+        /*
+         * Coords is an array of arrays of 2 integers,
+         * the x and y coordinates of each edge of the
+         * shape you're drawing
+         */
+        this.draw.beginPath();
+        this.draw.moveTo(coords[0][0], coords[0][1]);
+        //skip the first point
+        for(var i = 1; i < coords.length; i++){
+            this.draw.lineTo(coords[i][0], coords[i][1]);
+        }
+        this.draw.fill();
+    },
+    testShape : function(sides){
+        var coords = [];
+        for(var i = 0; i < 2 * Math.PI; i += 2 * Math.PI / sides){
+            coords.push([this.width / 2 + (this.width / 2 * Math.cos(i)), this.height / 2 - (this.height / 2 * Math.sin(i))]);
+        }
+        this.setColor("red");
+        this.shape(coords);
+    },
     rect : function(x, y, w, h){
         this.draw.fillRect(x, y, w, h);
     },
@@ -74,6 +95,13 @@ Canvas.prototype = {
         this.draw.beginPath();
         this.draw.arc(upperLeftX + diameter / 2, upperLeftY + diameter / 2, diameter / 2, 0, 2 * Math.PI);
         this.draw.fill();
+    },
+    triangle : function(x1, y1, x2, y2, x3, y3){
+        this.shape([
+            [x1, y1],
+            [x2, y2],
+            [x3, y3]
+        ]);
     },
     drawGear : function(x, y, width, color, rotated){
         //add sprite class, change to "drawSprite"
@@ -136,12 +164,7 @@ var block_colors = [
 
 function load_page() {
     var body = document.getElementById("body");
-    var fresh_canvas = document.createElement("canvas");
-    fresh_canvas.id = "canvas";
-    fresh_canvas.width = canvas_size;
-    fresh_canvas.height = canvas_size;
-    fresh_canvas.style.position = "absolute";
-    fresh_canvas.style.top = "0px";
-    fresh_canvas.style.left = "0px";
-    body.appendChild(fresh_canvas);
+    var canvas = document.getElementById("canvas");
+    canvas.width = canvas_size;
+    canvas.height = canvas_size;
 }

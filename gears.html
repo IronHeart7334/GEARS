@@ -18,12 +18,19 @@
                 border-style: groove;
                 border-width: 10px;
             }
+            #canvas {
+                position : absolute;
+                left : 0px;
+                top : 0px;
+                width : 700px;
+                height : 700px;
+            }
             #controls {
                 position:absolute;
-                left:1120px;
-                top:220px;
-                width:100px;
-                height:880px;
+                left:80%;
+                top:0px;
+                width : 20%;
+                height: 100%;
                 text-align: center;
             }
         </style>
@@ -99,6 +106,7 @@
     </head>
     
     <body onload="load_page(); load_game(); assign_color([['controls', silver(7), color2]]);" id="body">
+        <canvas id="canvas"></canvas>
         <div id="controls">
             <h2>Controls</h2>
 
