@@ -93,13 +93,8 @@ Belt.prototype = {
         canvas.rect(this.x + BLOCK_SIZE / 2, this.y, this.width - BLOCK_SIZE, this.height);
         
         canvas.setColor(silver(7));
-        canvas.draw.beginPath();
-        canvas.draw.arc(this.x + BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
-        canvas.draw.fill();
-        
-        canvas.draw.beginPath();
-        canvas.draw.arc(this.x + this.width - BLOCK_SIZE / 2, this.y + BLOCK_SIZE / 2, BLOCK_SIZE / 2 , 0, 2 * Math.PI);
-        canvas.draw.fill();
+        canvas.circle(this.x, this.y, BLOCK_SIZE);
+        canvas.circle(this.x + this.width - BLOCK_SIZE, this.y, BLOCK_SIZE);
     },
     collide : function(entity){
         var speed = blocksPerSecond(1);

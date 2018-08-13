@@ -1,5 +1,8 @@
 var canvas_size = 700;
 
+//still need to implement triangle, shape, and sprite methods, then apply to player class
+
+
 function Canvas(){
     this.linked = null; //the HTML canvas this will reference
     this.draw = null; //the context this will draw on
@@ -67,7 +70,13 @@ Canvas.prototype = {
     rect : function(x, y, w, h){
         this.draw.fillRect(x, y, w, h);
     },
+    circle : function(upperLeftX, upperLeftY, diameter){
+        this.draw.beginPath();
+        this.draw.arc(upperLeftX + diameter / 2, upperLeftY + diameter / 2, diameter / 2, 0, 2 * Math.PI);
+        this.draw.fill();
+    },
     drawGear : function(x, y, width, color, rotated){
+        //add sprite class, change to "drawSprite"
         var size = width / 5;
         var gear1 = [
             [1, 0, 1, 0, 1],
