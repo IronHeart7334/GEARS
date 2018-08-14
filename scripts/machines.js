@@ -127,7 +127,7 @@ Tram.prototype = {
         canvas.rect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
         
         if (this.isEnabled()){
-            canvas.setColor(energy_color);
+            canvas.setColor("rgb(155, 255, 0)");
             canvas.rect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
         }
     },
@@ -209,7 +209,7 @@ Generator.prototype = {
         canvas.rect(this.x, this.y - BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 2);
         canvas.rect(this.x, this.y + BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE / 2);
         
-        canvas.setColor(energy_color);
+        canvas.setColor("rgb(155, 255, 0)");
         canvas.rect(this.x + BLOCK_SIZE * 0.4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 5, BLOCK_SIZE);
     },
     

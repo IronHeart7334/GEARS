@@ -44,14 +44,6 @@
             }
             
             var current_level;
-            
-            function assign_color(changes) {
-                for (var alter of changes) {
-                    var change = document.getElementById(alter[0]);
-                    change.style.background = alter[1];
-                    change.style.borderColor = alter[2];     
-                }
-            }
 
             function load_game() {
                 GAME = new Game();
@@ -105,7 +97,7 @@
         </script>
     </head>
     
-    <body onload="load_page(); load_game(); assign_color([['controls', silver(7), color2]]);" id="body">
+    <body onload="load_page(); load_game();" id="body">
         <canvas id="canvas"></canvas>
         <div id="controls">
             <h2>Controls</h2>

@@ -1,6 +1,47 @@
+/*
+ * The Canvas class is used to more easily perform opperations on an HTML canvas.
+ * 
+ * USAGE:
+ * 
+ * first, define the canvas object using the standard "var c = new Canvas()"
+ * 
+ * once your HTML is loaded, you can then link the object to the canvas, via
+ * "c.link(document.getElementById(...))"
+ * at which point, you can now access the canvas element by using "c.linked" 
+ * or "c.draw" if you want to access the 2d context for drawing.
+ * 
+ * the setContentSize method is used to control how much the canvas can translate
+ * 
+ * setFocus is used to change where the canvas translates to, making the focus point the new origin
+ * 
+ * setOffsets is used for defining where the canvas' focal point will appear on the canvas,
+ * use setOffsets(c.width / 2, c.height / 2) to put it in the center of the canvas
+ * 
+ * use updateTranslate to translate the canvas to where it is focusing on its focal point, 
+ * but shifted by the canvas' offsets. The translation will be constrained by the parameters set by setContentSize
+ * EXAMPLE:
+ *      var c = new Canvas();
+ *      c.link(...);
+ *      //width of 1000, height of 500
+ *      c.setContentSize(500, 500);
+ *      c.setFocus(250, 250);
+ *      c.setOffsets(100, 100);
+ *      c.updateTranslate();
+ *      
+ *  will translate the canvas to (-150, -150),
+ *  but since that is outside the content of the canvas (0 to 1000, 0 to 500),
+ *  it will be translated to (0, 0) instead.
+ *  Since the canvas' height and its content height are the same, it will never translate along the y axis
+ */
+
 var canvas_size = 700; //used to create the canvas
 
-//TODO: sprites
+/*
+ *TODO:
+ *  Sprite class
+ *  Color class
+ *  Get rid of canvas_size global
+ */
 
 function Canvas(){
     this.linked = null; //the HTML canvas this will reference
@@ -16,6 +57,7 @@ function Canvas(){
 }
 Canvas.prototype = {
     link : function(elementId){
+        // links this object to a canvas, if it exists
         try{
             this.linked = document.getElementById(elementId);
             this.draw = this.linked.getContext("2d");
@@ -145,25 +187,7 @@ Canvas.prototype = {
     }
 };
 
-
-// Colors
-// rename these        	
-var color1 = "rgb(150, 50, 0)";
-var color2 = "rgb(35, 100, 0)";
-var color3 = "rgb(175, 175, 255)";
-var energy_color = "rgb(155, 255, 0)";
-
-var block_colors = [
-    [gold(4), color1],
-    [color1, color2],
-    [silver(8), color3],
-    [silver(4), silver(9)],
-    [silver(3), silver(4)],
-    [gold(4), gold(9)]
-];
-
 function load_page() {
-    var body = document.getElementById("body");
     var canvas = document.getElementById("canvas");
     canvas.width = canvas_size;
     canvas.height = canvas_size;
