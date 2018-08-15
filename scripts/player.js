@@ -1,16 +1,27 @@
 /*
  * The Player class is used to construct the player object initialized by the HTML page
+ * 
+ * Player uses features defined by the Entity class to keep track of its position,
+ * but manages its jumping and direction itself
+ */
+
+/*
+ * TODO:
+ * -Remove references to BLOCK_SIZE?
+ * -Somehow import Entity?
+ * -blocksPerSecond
+ * -add Inventory
+ * -make this.gears better, maybe integrate into Inventory?
  */
 
 function Player() {
     Entity.call(this);
-    this.setWidth(BLOCK_SIZE * 0.9);
+    this.setWidth(BLOCK_SIZE * 0.9); //otherwise, can't fit through holes
     this.setHeight(BLOCK_SIZE * 0.9);
     this.facingMod = 1; // 1: right, -1: left
     this.moving = false; // moving left or right
     
-    this.falling = true; // used to determine if this is allowed to move left or right
-    
+    this.falling = true; // used to determine if this is allowed to initiate a jump
     this.jumping = false; // if this Player is in the middle of jumping
     this.timeInJump = 0; // number of frames it has been jumping for
     this.jumpX = 0; // total x distance that will be traveled when this finishes jumping
@@ -36,6 +47,7 @@ Player.prototype = {
         this.inventory = {}; //Key-Value pairs of String, int
     },
     load : function(x, y){
+        //invoked by Area upon entering it
         this.setCoords(x, y); //defined by Entity
         this.spawnCoords = [x, y];
     },
@@ -64,11 +76,6 @@ Player.prototype = {
     stop : function(){
         this.moving = false;
     },
-    obtainGear:function(gear) {
-        //TODO: maybe make it copy gear data?
-        this.gears.push(gear);
-        this.currentGearIndex = this.gears.indexOf(gear);
-    },
     pickup : function(item){
         // item is a string
         if(this.inventory.hasOwnProperty(item)){
@@ -82,6 +89,11 @@ Player.prototype = {
     },
     loseItem : function(itemName){
         this.inventory[itemName]--;
+    },
+    obtainGear:function(gear) {
+        //TODO: maybe make it copy gear data?
+        this.gears.push(gear);
+        this.currentGearIndex = this.gears.indexOf(gear);
     },
     shiftGear:function() {
         // changes the currently selected gear
@@ -177,5 +189,4 @@ Player.prototype = {
         }
     }
 };
-
 extend(Player, Entity);

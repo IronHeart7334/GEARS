@@ -1,4 +1,29 @@
-//the base class that will be used by most of the program
+/*
+ * The Entity class is used as the base for most of the other classes used by this program.
+ * Entity is basically a way to store an object's position and size, so checking for collisions is a snap.
+ * 
+ * HOW TO EXTEND ENTITY
+ * Inheritance in Javascript is... painful.
+ * Luckily, I've written a function in the 'utilities.js' module that does it for you!
+ * 
+ * EXAMPLE:
+ *   function a(b, c){...};
+ *   a.prototype = {...};
+ *   
+ *   function d(e, f){
+ *       a.call(this, e, f);
+ *   }
+ *   d.prototype = {...};
+ *   extend(d, a); //think of it as 'class d extends a'
+ *   
+ * See the documentation in the aformentioned utilities module for more details
+ */
+
+/*
+ * TODO:
+ * -remove references to BLOCK_SIZE
+ */
+
 function Entity(){
     this.x = 0;
     this.y = 0;
@@ -6,7 +31,6 @@ function Entity(){
     this.height = BLOCK_SIZE;
     this.hostingGame = null; //the game where this entity is used
 }
-
 Entity.prototype = {
     setX : function(x){
         this.x = x;
@@ -42,18 +66,7 @@ Entity.prototype = {
             this.y <= entity.y + entity.height
         );
     },
-    isWithin : function(x1, y1, x2, y2){
-        /*
-        x1, y1: upper left corner
-        x2, y2: lower right
-        */
-        return (
-            (this.x + this.width >= x1) &&
-            (this.y + this.height >= y1) &&
-            (this.x <= x2) &&
-            (this.y <= y2)
-        );
-    },
+    
     setHostingGame : function(game){
         this.hostingGame = game;
     },
