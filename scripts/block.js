@@ -1,6 +1,14 @@
 /*
 The Block class is used to generate the platforms that the player interacts with.
 */
+
+/*
+ * TODO: 
+ * -change BLOCK_SIZE, don't want global. Maybe set in Game since it keeps track of the canvas size?
+ * -maybe add special blocks i.e. IceBlock with special collide(entity) function that slips entities around?
+ * -change to use Sprite instead of current block 'image'
+ */
+
 var BLOCK_SIZE = canvas_size / 10; //may want to redo this as a strict size
 
 function Block(baseColor, rimColor, x, y) {
@@ -21,6 +29,7 @@ function Block(baseColor, rimColor, x, y) {
 Block.prototype = {
     disableTop : function(){
         //prevents top collisions when there is a block above this one
+        //invoked by Area
         this.hasBlockAbove = true;
     },
     draw : function(canvas){
