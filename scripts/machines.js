@@ -1,10 +1,39 @@
-// abstract base class for machines
+/*
+ * Machine is the abstract base class for the machines used by the program.
+ * A machine is an object loaded with a level, which acts as a puzzle or obstacle for the player to overcome.
+ * 
+ * Machines collide method is automatically invoked upon colliding with another entity,
+ * with the entity passed as the parameter.
+ * 
+ * update is invoked if the machine is either automatically on, or if it is near an emitting machine
+ * 
+ * HOW TO EXTEND MACHINE:
+ * function f(...){
+ *      Machine.call(this, ...);
+ * }
+ * f.prototype = {
+ *      draw : function(canvas){...},
+ *      collide : function(entity){...},
+ *      update : function(){...}
+ * };
+ * extend(f, Machine);
+ * 
+ */
+
+/*
+ * TODO:
+ * -move emitting range from Area.updateMachines to Machine
+ * -get rid of global BLOCK_SIZE references.
+ * -move PickupGear to Gear
+ * -add downward lift platforms
+ */
+
 function Machine(x, y, autoOn){
     Entity.call(this);
     this.startX = x * BLOCK_SIZE;
     this.startY = y * BLOCK_SIZE;
-    this.autoOn = autoOn;
-    this.emitting = false;
+    this.autoOn = autoOn; //a machine that is autoOn will not need a power source to run
+    this.emitting = false; //a machine that is emitting will power other machines within 5 blocks of its upper-left corner (look in level.js)
 }
 Machine.prototype = {
     init : function(){
@@ -43,6 +72,7 @@ Machine.prototype = {
 };
 extend(Machine, Entity);
 
+// Gears provide players with a way to unlock new jumping patterns
 function Gear(x, y, jump){
     Machine.call(this, x, y, true);
     this.jump = jump;
@@ -81,7 +111,7 @@ Gear.prototype = {
 extend(Gear, Machine);
 
 
-
+//A conveyor belt
 function Belt(x, y, width, movesRight, autoOn){
     Machine.call(this, x, y, autoOn);
     this.setWidth(width * BLOCK_SIZE);
@@ -100,7 +130,9 @@ Belt.prototype = {
         var speed = blocksPerSecond(1);
         entity.setY(this.y - entity.height);
         entity.falling = false;
-        entity.moveX((this.movesRight) ? speed : -speed);
+        if(this.isEnabled()){
+            entity.moveX((this.movesRight) ? speed : -speed);
+        }
     },
     update : function(){
         //do nothing
@@ -109,7 +141,11 @@ Belt.prototype = {
 extend(Belt, Machine);
 
 
-
+//A magnetic tram to carry the player
+/*
+ * destinations is an array of arrays of 2 ints: 
+ * the block offsets of the x and y coordinates that the tram will pass through
+ */
 function Tram(x, y, destinations, autoOn){
     Machine.call(this, x, y, autoOn);
     this.destinations = [[this.startX, this.startY]];
@@ -152,7 +188,7 @@ Tram.prototype = {
     },
     followPath : function(){
         current = this.destinations[this.destNum];
-        var speed = blocksPerSecond(1);
+        var speed = blocksPerSecond(3);
         if (this.x > current[0]){
             this.x -= speed;
         } else if (this.x < current[0]){
@@ -194,7 +230,7 @@ Tram.prototype = {
 extend(Tram, Machine);
 
 
-
+// a power generator that powers nearby machines
 function Generator(x, y){
     Machine.call(this, x, y, true);
     this.setHeight(BLOCK_SIZE * 2);
@@ -221,6 +257,7 @@ extend(Generator, Machine);
 
 
 
+//acts as a block while it isn't powered
 function Door(x, y){
     Machine.call(this, x, y, false);
 }
@@ -257,7 +294,7 @@ Door.prototype = {
 extend(Door, Machine);
 
 
-
+// gives the user gears, which can be put into a Train. Kinda redundant, will move into Gear soon.
 function PickupGear(x, y){
     Machine.call(this, x, y, true);
     this.claimed = false;
@@ -295,7 +332,7 @@ extend(PickupGear, Machine);
 
 
 
-// a gear train
+// a gear train. When a player collides with it, if they have a pickup gear, slots it in. Emits once it is full of gears
 function Train(x, y, autoOn, gearsNeeded){
     Machine.call(this, x, y, autoOn);
     this.setWidth(BLOCK_SIZE * gearsNeeded);
@@ -338,7 +375,7 @@ Train.prototype = {
 extend(Train, Machine);
 
 
-
+//lift platform. Carries entities up.
 function Lift(x, y, autoOn, distUp){
     //distUp is the amount of blocks it will move up
     Machine.call(this, x, y, autoOn);
