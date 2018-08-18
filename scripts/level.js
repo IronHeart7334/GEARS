@@ -1,4 +1,15 @@
-//not done
+/*
+ * TODO:
+ * -Move emitting range from Area.updateMachines to Machine
+ * -Make an entity list for each area/level, then iterate through it in Area.update, passing each into this.checkColl
+ * -get rid of player global
+ */
+
+/*
+ * The Area class is used to break up levels into several sections, which are passed in to the Level constructor
+ * 
+ * setHostingGame is invoked by Level
+ */
 function Area(blockConstructors, blockMap, machines, leftSpawn, rightSpawn){
     /*
     Parameters:
@@ -92,6 +103,7 @@ Area.prototype = {
     },
     
     //checks which machines are within emitting distance of others
+    //TODO: move emitting range to Machine
     updateMachines : function(){
         for(machine of this.machines){
             function check(otherMachine){
@@ -144,20 +156,28 @@ Area.prototype = {
 
 /*
 importDataFromFile : function(path){
-        // this is not working
-        var req = new XMLHttpRequest();
-        req.open("GET", path, true);
-        req.onreadystatechanged = function(){
-            if(req.readyState === 4){
-                if(req.status === 200 || req.status === 0){
-                    console.log(req.responseText);
-                }
+    // this is not working
+    var req = new XMLHttpRequest();
+    req.open("GET", path, true);
+    req.onreadystatechanged = function(){
+        if(req.readyState === 4){
+            if(req.status === 200 || req.status === 0){
+                console.log(req.responseText);
             }
         }
-        req.send(null);
     }
+    req.send(null);
+}
 */
 
+/*
+ * The Level class is used to generate a level for the player to play through
+ * 
+ * name : the name of the level (unused)
+ * areas : an array of Areas, the different sections of the level
+ * startAreaNumber : the Area the player will initialy spawn in. EX: 1 means player will start in the second Area is the areas array
+ * spawnsOnLeft : boolean, whether or not the player will spawn initially on the left spawn point of the spawn area
+ */
 function Level(name, areas, startAreaNumber, spawnsOnLeft){
     this.name = name;
     this.areas = areas;
@@ -191,7 +211,7 @@ Level.prototype = {
         this.areas[this.currentArea].draw(canvas);
     },
     update : function(){
-        if(player.x < 0 && this.currentArea != 0){
+        if(player.x < 0 && this.currentArea !== 0){
             //exit left
             this.currentArea--;
             this.areas[this.currentArea].loadPlayerRight(player);
@@ -207,6 +227,7 @@ Level.prototype = {
         this.areas[this.currentArea].update();
     },
     setHostingGame : function(game){
+        //invoked by GAME
         this.hostingGame = game;
         this.areas.forEach(function(area){area.setHostingGame(game);});
     }

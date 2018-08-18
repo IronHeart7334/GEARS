@@ -1,3 +1,11 @@
+/*
+ * TODO:
+ * -get rid of current_level constant.
+ * -make some way to convert CSV files to level data
+ * -change blockConstructors to something other than function
+ * -don't invoke machine constructors, find some way to load them later
+ */
+
 // Temporary stuff
 var a1 = new Area(
     [MetalBlock, GoldBlock], 

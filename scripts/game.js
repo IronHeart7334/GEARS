@@ -1,15 +1,23 @@
 /*
  * The Game class is used to store the info of the current play session
+ * 
+ * use this class to avoid global variables.
+ * 
+ * The Game class handles all the updating, including drawing.
+ */
+
+/*
+ * TODO:
+ * -make Game class store blockSize
  */
 
 function Game(){
-    this.playing = false;
     this.currentLevel = null;
     this.player = null;
     this.fps = 20;
     this.timer = null;
     this.paused = true;
-    this.hostingCanvas = null;
+    this.hostingCanvas = null; //the Canvas this is drawing on (my class, not DOM element)
 }
 Game.prototype = {
     setHost : function(canvas){

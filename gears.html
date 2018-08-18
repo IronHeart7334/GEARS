@@ -36,9 +36,11 @@
         </style>
         
         <script>
+            //globals BAD
             var GAME;
             var player;
             
+            //move this to Game
             function blocksPerSecond(blocks){
                 return BLOCK_SIZE * blocks / GAME.fps;
             }
@@ -115,8 +117,7 @@
             <p>Move right</p>
 
             <h3>P</h3>
-            <p>Pause/unpause</p>
-            <i>Bugged</i>
+            <p>Pause/resume</p>
         </div>
         
     </body>
