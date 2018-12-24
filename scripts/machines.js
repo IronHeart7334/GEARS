@@ -1,12 +1,12 @@
 /*
  * Machine is the abstract base class for the machines used by the program.
  * A machine is an object loaded with a level, which acts as a puzzle or obstacle for the player to overcome.
- * 
+ *
  * Machines collide method is automatically invoked upon colliding with another entity,
  * with the entity passed as the parameter.
- * 
+ *
  * update is invoked if the machine is either automatically on, or if it is near an emitting machine
- * 
+ *
  * HOW TO EXTEND MACHINE:
  * function f(...){
  *      Machine.call(this, ...);
@@ -17,7 +17,7 @@
  *      update : function(){...}
  * };
  * extend(f, Machine);
- * 
+ *
  */
 
 /*
@@ -28,66 +28,64 @@
  * -add downward lift platforms
  */
 
-function Machine(x, y, autoOn){
-    Entity.call(this);
-    this.startX = x * BLOCK_SIZE;
-    this.startY = y * BLOCK_SIZE;
-    this.autoOn = autoOn; //a machine that is autoOn will not need a power source to run
-    this.emitting = false; //a machine that is emitting will power other machines within 5 blocks of its upper-left corner (look in level.js)
-}
-Machine.prototype = {
-    init : function(){
+class Machine extends Entity{
+    constructor(x, y, autoOn){
+      super();
+      this.startX = x * BLOCK_SIZE;
+      this.startY = y * BLOCK_SIZE;
+      this.autoOn = autoOn; //a machine that is autoOn will not need a power source to run
+      this.emitting = false; //a machine that is emitting will power other machines within 5 blocks of its upper-left corner (look in level.js)
+    }
+    init(){
         this.setCoords(this.startX, this.startY);
         this.powered = false;
-    },
-    isEnabled : function(){
+    }
+    isEnabled(){
         return this.powered || this.autoOn;
-    },
-    setEmitting : function(boolean){
+    }
+    setEmitting(boolean){
         this.emitting = boolean;
-    },
-    getEmitting : function(){
+    }
+    getEmitting(){
         return this.emitting;
-    },
-    draw : function(canvas){
+    }
+    draw(canvas){
         var obj = this;
         throw new Error("No draw method found for " + obj);
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         //each subclass defines
-    },
-    checkColl : function(entity){
+    }
+    checkColl(entity){
         if(this.checkForCollide(entity)){
             this.collide(entity);
         }
-    },
-    update : function(){
+    }
+    update(){
         //defined by subclasses
-    },
-    checkIfUpdate : function(){
+    }
+    checkIfUpdate(){
         if(this.isEnabled()){
             this.update();
         }
     }
 };
-extend(Machine, Entity);
 
 // Gears provide players with a way to unlock new jumping patterns
-function Gear(x, y, jump){
-    Machine.call(this, x, y, true);
-    this.jump = jump;
-    this.claimed = false;
-    this.rotated = false;
-    this.rotateCount = 0;
-}
-
-Gear.prototype = {
-    draw : function(canvas){
+class Gear extends Machine{
+    constructor(x, y, jump){
+        super(x, y, true);
+        this.jump = jump;
+        this.claimed = false;
+        this.rotated = false;
+        this.rotateCount = 0;
+    }
+    draw(canvas){
         if(!this.claimed){
             canvas.drawGear(this.x, this.y, BLOCK_SIZE * 0.9, this.jump.color, this.rotated);
         }
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         try{
             if(!this.claimed){
                 entity.obtainGear(this.jump);
@@ -97,8 +95,8 @@ Gear.prototype = {
             //not a Player
             console.log(e.stack);
         }
-    },
-    update : function(){
+    }
+    update(){
         if(!this.claimed){
             if(this.rotateCount === this.getHost().fps){
                 this.rotated = !this.rotated;
@@ -108,99 +106,96 @@ Gear.prototype = {
         }
     }
 };
-extend(Gear, Machine);
-
 
 //A conveyor belt
-function Belt(x, y, width, movesRight, autoOn){
-    Machine.call(this, x, y, autoOn);
-    this.setWidth(width * BLOCK_SIZE);
-    this.movesRight = movesRight;
-}
-Belt.prototype = {
-    draw : function(canvas){
+class Belt extends Machine{
+    constructor(x, y, width, movesRight, autoOn){
+      super(x, y, autoOn);
+      this.setWidth(width * BLOCK_SIZE);
+      this.movesRight = movesRight;
+    }
+    draw(canvas){
         canvas.setColor("rgb(0, 0, 0)");
         canvas.rect(this.x + BLOCK_SIZE / 2, this.y, this.width - BLOCK_SIZE, this.height);
-        
+
         canvas.setColor(silver(7));
         canvas.circle(this.x, this.y, BLOCK_SIZE);
         canvas.circle(this.x + this.width - BLOCK_SIZE, this.y, BLOCK_SIZE);
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         var speed = blocksPerSecond(1);
         entity.setY(this.y - entity.height);
         entity.falling = false;
         if(this.isEnabled()){
             entity.moveX((this.movesRight) ? speed : -speed);
         }
-    },
-    update : function(){
+    }
+    update(){
         //do nothing
     }
 };
-extend(Belt, Machine);
 
 
 //A magnetic tram to carry the player
 /*
- * destinations is an array of arrays of 2 ints: 
+ * destinations is an array of arrays of 2 ints:
  * the block offsets of the x and y coordinates that the tram will pass through
  */
-function Tram(x, y, destinations, autoOn){
-    Machine.call(this, x, y, autoOn);
-    this.destinations = [[this.startX, this.startY]];
-    var t = this;
-    destinations.forEach(function(coords){t.destinations.push([coords[0] * BLOCK_SIZE, coords[1] * BLOCK_SIZE])});
-    this.destNum = 0; //the index of the next destination to go to
-    this.ready = true; //has completed carrying an entity and has returned to its start point
-    this.moving = false;
-    this.carrying = null; //the entity this is carrying
-}
-Tram.prototype = {
-    draw : function(canvas){
+class Tram extends Machine{
+    constructor(x, y, destinations, autoOn){
+        super(x, y, autoOn);
+        this.destinations = [[this.startX, this.startY]];
+        var t = this;
+        destinations.forEach(function(coords){t.destinations.push([coords[0] * BLOCK_SIZE, coords[1] * BLOCK_SIZE])});
+        this.destNum = 0; //the index of the next destination to go to
+        this.ready = true; //has completed carrying an entity and has returned to its start point
+        this.moving = false;
+        this.carrying = null; //the entity this is carrying
+    }
+    draw(canvas){
         canvas.setColor(silver(7));
         canvas.rect(this.x + BLOCK_SIZE / 4, this.y, BLOCK_SIZE / 2, BLOCK_SIZE);
         canvas.rect(this.x, this.y + BLOCK_SIZE * 0.75, BLOCK_SIZE, BLOCK_SIZE / 4);
-        
+
         if (this.isEnabled()){
             canvas.setColor("rgb(155, 255, 0)");
             canvas.rect(this.x, this.y + BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 20);
         }
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         if(this.ready && this.isEnabled() && this.carrying === null){
             this.carrying = entity;
             this.moving = true;
             this.ready = false;
         }
-    },
-    checkForCollide : function(entity){
+    }
+    checkForCollide(entity){
         var ret = false;
         if(!this.moving){
             ret = Machine.prototype.checkForCollide.call(this, entity);
         }
-        
+
         if(!this.moving && this.isEnabled() && entity.x >= this.x && entity.x <= this.x + BLOCK_SIZE && entity.y >= this.y + BLOCK_SIZE){
             entity.moveY(-blocksPerSecond(2));
             entity.falling = false;
         }
         return ret;
-    },
-    followPath : function(){
-        current = this.destinations[this.destNum];
+    }
+    followPath(){
+        let current = this.destinations[this.destNum];
         var speed = blocksPerSecond(3);
         if (this.x > current[0]){
             this.x -= speed;
         } else if (this.x < current[0]){
             this.x += speed;
         }
-    
+
         if (this.y > current[1]){
             this.y -= speed;
         } else if (this.y < current[1]){
             this.y += speed;
         }
-    
+
         //check if we are as close as possible
         if (between(current[0], this.x, current[0] + speed) && between(current[1], this.y, current[1] + speed)){
             if(this.destNum === 0 && !this.ready && !this.carrying){
@@ -215,8 +210,8 @@ Tram.prototype = {
                 this.carrying = null;
             }
         }
-    },
-    update : function(){
+    }
+    update(){
         if(this.moving){
             this.followPath();
             if(this.carrying !== null){
@@ -227,42 +222,38 @@ Tram.prototype = {
         }
     }
 };
-extend(Tram, Machine);
-
 
 // a power generator that powers nearby machines
-function Generator(x, y){
-    Machine.call(this, x, y, true);
-    this.setHeight(BLOCK_SIZE * 2);
-    this.setEmitting(true);
-}
-Generator.prototype = {
-    draw:function(canvas) {
+class Generator extends Machine{
+    constructor(x, y){
+        super(x, y, true);
+        this.setHeight(BLOCK_SIZE * 2);
+        this.setEmitting(true);
+    }
+    draw(canvas) {
         canvas.setColor(silver(7));
         canvas.rect(this.x + BLOCK_SIZE * 0.1, this.y - BLOCK_SIZE, BLOCK_SIZE * 0.8, BLOCK_SIZE * 2);
-        
+
         canvas.setColor(silver(4));
         canvas.rect(this.x, this.y - BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE / 2);
         canvas.rect(this.x, this.y + BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE / 2);
-        
+
         canvas.setColor("rgb(155, 255, 0)");
         canvas.rect(this.x + BLOCK_SIZE * 0.4, this.y - BLOCK_SIZE / 2, BLOCK_SIZE / 5, BLOCK_SIZE);
-    },
-    
-    update:function() {
+    }
+    update() {
         //do nothing
     }
 };
-extend(Generator, Machine);
 
 
 
 //acts as a block while it isn't powered
-function Door(x, y){
-    Machine.call(this, x, y, false);
-}
-Door.prototype = {
-    collide : function(entity) {
+class Door extends Machine{
+    constructor(x, y){
+        super(x, y, false);
+    }
+    collide(entity) {
         if(!this.isEnabled()){
             if(entity.x + entity.width / 2 > this.x + this.width / 2){
                 //over halfway through
@@ -271,13 +262,12 @@ Door.prototype = {
                 entity.setX(this.x - entity.width);
             }
         }
-    },
-    
-    draw:function(canvas) {
+    }
+    draw(canvas) {
         if (!this.isEnabled()){
             canvas.setColor(silver(6));
             canvas.rect(this.x + BLOCK_SIZE / 10, this.y, BLOCK_SIZE * 0.8, BLOCK_SIZE);
-        
+
             canvas.setColor("rgb(0, 0), 0)");
             canvas.rect(this.x + BLOCK_SIZE / 10, this.y + BLOCK_SIZE / 2, BLOCK_SIZE * 0.8, 1);
         }
@@ -285,29 +275,27 @@ Door.prototype = {
         canvas.setColor(silver(2));
         canvas.rect(this.x, this.y, BLOCK_SIZE, BLOCK_SIZE / 10);
         canvas.rect(this.x, this.y + BLOCK_SIZE * 0.9, BLOCK_SIZE, BLOCK_SIZE / 10);
-    },
-    
-    update:function() {
+    }
+    update() {
         // do nothing
-    } 
+    }
 };
-extend(Door, Machine);
 
 
 // gives the user gears, which can be put into a Train. Kinda redundant, will move into Gear soon.
-function PickupGear(x, y){
-    Machine.call(this, x, y, true);
-    this.claimed = false;
-    this.rotated = false;
-    this.rotateCount = 0;
-}
-PickupGear.prototype = {
-    draw : function(canvas){
+class PickupGear extends Machine{
+    constructor(x, y){
+        super(x, y, true);
+        this.claimed = false;
+        this.rotated = false;
+        this.rotateCount = 0;
+    }
+    draw(canvas){
         if(!this.claimed){
             canvas.drawGear(this.x, this.y, BLOCK_SIZE * 0.9, gold(7), this.rotated);
         }
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         try{
             if(!this.claimed){
                 entity.pickup("gear");
@@ -317,8 +305,8 @@ PickupGear.prototype = {
             //not a Player
             console.log(e.stack);
         }
-    },
-    update : function(){
+    }
+    update(){
         if(!this.claimed){
             if(this.rotateCount === this.getHost().fps){
                 this.rotated = !this.rotated;
@@ -328,29 +316,28 @@ PickupGear.prototype = {
         }
     }
 };
-extend(PickupGear, Machine);
 
 
 
 // a gear train. When a player collides with it, if they have a pickup gear, slots it in. Emits once it is full of gears
-function Train(x, y, autoOn, gearsNeeded){
-    Machine.call(this, x, y, autoOn);
-    this.setWidth(BLOCK_SIZE * gearsNeeded);
-    this.maxGears = gearsNeeded;
-    this.gearCount = 0;
-    this.rotateCount = 0;
-    this.firstRotated = true;
-}
-Train.prototype = {
-    draw:function(canvas){
+class Train extends Machine{
+    constructor(x, y, autoOn, gearsNeeded){
+        super(x, y, autoOn);
+        this.setWidth(BLOCK_SIZE * gearsNeeded);
+        this.maxGears = gearsNeeded;
+        this.gearCount = 0;
+        this.rotateCount = 0;
+        this.firstRotated = true;
+    }
+    draw(canvas){
         canvas.setColor(silver(4));
         canvas.rect(this.x, this.y, this.width, BLOCK_SIZE);
-        
+
         for(var i = 0; i < this.gearCount; i++){
             canvas.drawGear(this.x + BLOCK_SIZE * i, this.y, BLOCK_SIZE, silver(2), (i % 2 === 0) ? this.firstRotated : !this.firstRotated);
         }
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         try{
             if(entity.getHasPickup("gear") && this.gearCount < this.maxGears){
                 this.gearCount++;
@@ -360,8 +347,8 @@ Train.prototype = {
             //not a player
             console.log(e.stack);
         }
-    },
-    update:function(){
+    }
+    update(){
         if(this.gearCount === this.maxGears){
             this.setEmitting(true);
             this.rotateCount++;
@@ -372,40 +359,39 @@ Train.prototype = {
         }
     }
 };
-extend(Train, Machine);
 
 
 //lift platform. Carries entities up.
-function Lift(x, y, autoOn, distUp){
-    //distUp is the amount of blocks it will move up
-    Machine.call(this, x, y, autoOn);
-    this.setHeight(BLOCK_SIZE / 10);
-    this.maxAscent = this.startY - distUp * BLOCK_SIZE;
-    this.goingUp = true;
-    this.moving = false;
-    this.waiting = false; //waiting to go back down
-    this.waitTime = 0;
-}
-Lift.prototype = {
-    draw : function(canvas){
+class Lift extends Machine{
+    constructor(x, y, autoOn, distUp){
+        //distUp is the amount of blocks it will move up
+        super(x, y, autoOn);
+        this.setHeight(BLOCK_SIZE / 10);
+        this.maxAscent = this.startY - distUp * BLOCK_SIZE;
+        this.goingUp = true;
+        this.moving = false;
+        this.waiting = false; //waiting to go back down
+        this.waitTime = 0;
+    }
+    draw(canvas){
         canvas.setColor(silver(3));
         canvas.rect(this.x, this.y - BLOCK_SIZE / 10, this.width, this.height);
-    },
-    collide : function(entity){
+    }
+    collide(entity){
         entity.setY(this.y - entity.height);
         this.moving = true;
-    },
-    update : function(){
+    }
+    update(){
         if(this.moving){
             var speed = blocksPerSecond(2);
             if(this.goingUp){
                 speed = -speed;
             }
-            
+
             if(!this.waiting){
                 this.moveY(speed);
             }
-            
+
             if(this.waiting){
                 if(this.waitTime === this.getHost().fps * 2){
                     this.waitTime = 0;
@@ -414,7 +400,7 @@ Lift.prototype = {
                     this.waitTime++;
                 }
             }
-            
+
             //remember, higher y means further down
             if(this.y <= this.maxAscent && this.goingUp){
                 this.goingUp = false;
@@ -427,4 +413,3 @@ Lift.prototype = {
         }
     }
 };
-extend(Lift, Machine);
